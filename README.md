@@ -417,86 +417,106 @@ flowchart TD
 - `- - →` Dashed arrow = critical bidirectional sensor data flow (Worker App → Fraud Engine)
 
 ```mermaid
-flowchart LR
-    subgraph EXT [External Data Sources]
+flowchart TD
+    subgraph EXT["🌐 External Data Sources"]
         OWM["OpenWeatherMap\nRain / Temp / Wind"]
         CPCB["CPCB Portal\nAQI Real-time"]
-        NDMA["NDMA + IMD RSS\nFlood and Alert Feeds"]
-        IPAPI["ip-api.com\nNetwork Geo for fraud"]
-        OSM["OpenStreetMap GeoJSON\nZone boundaries"]
+        IMD["NDMA / IMD RSS\nFlood & Alert Feeds"]
+        IPAPI["ip-api.com\nNetwork Geo Fraud"]
+        OSM["OpenStreetMap\nZone Boundaries"]
     end
 
-    subgraph ING [Ingestion Layer]
-        TRIGGER["Trigger Engine\nAPScheduler 15-min poll\nPostGIS ST_Within zone match\nThreshold check + sustained breach validation"]
+    subgraph TRIGGER["⚙️ Trigger Engine"]
+        TE["APScheduler 15-min poll\nPostGIS ST_Within zone match\nThreshold check\nSustained breach validation"]
     end
 
-    EXT --> TRIGGER
-
-    REDPANDA["Redpanda - Kafka-Compatible Event Stream\nTopic: processed.trigger.events\nFan-out to all consumers + Redis dedup locks"]
-
-    TRIGGER --> REDPANDA
-
-    subgraph DEFENSE [Adversarial Defense Engine - NEW]
-        GPS["GPS Physics\n(Accuracy / Cold-start)"]
-        SENSOR["Device Sensors\n(Accel / Gyro / Mock Flag)"]
-        NETGEO["Network Geo\n(IP / Carrier / Towers)"]
-        BEHAV["Behavioral\n(T-30 Burst / Velocity)"]
+    subgraph KAFKA["📡 Redpanda / Kafka Event Stream"]
+        RP["Kafka-compatible Event Bus\nTopic: processed.trigger.events\nFan-out to all consumers\nRedis dedup locks"]
     end
 
-    REDPANDA --> GPS
-    REDPANDA --> SENSOR
-    REDPANDA --> NETGEO
-    REDPANDA --> BEHAV
-
-    MLSCORER["ML Ensemble Scorer\n(Isolation Forest + GradientBoosting)\nOutput: Auto-approve / Soft-hold / Block"]
-
-    GPS --> MLSCORER
-    SENSOR --> MLSCORER
-    NETGEO --> MLSCORER
-    BEHAV --> MLSCORER
-
-    subgraph PROC [Processing Services]
-        FRAUDENG["Fraud Engine\n(Velocity & Fingerprint)"]
-        CLAIMS["Claims Service\n(Approve / Hold / Block)"]
-        RISK["Risk Scoring\n(XGBoost + SHAP)"]
-        NOTIF["Notifications\n(Firebase FCM)"]
-        AUTH["Auth\n(OTP / JWT)"]
+    subgraph ADE["🛡️ Adversarial Defense Engine — NEW after Market Crash"]
+        GPS["GPS Physics\nVariance sigma\nAccuracy radius\nCold-start time\nOSM path match"]
+        SENS["Device Sensors\nAccel RMS / Gyro delta\nisMockLocation flag\nBattery / CPU SDK check"]
+        NET["Network Geo\nIP vs GPS delta\nTower handoffs\nCarrier subnet\nip-api.com lookup"]
+        BEH["Behavioral\nT-30 residency\nBurst > 150 / 90s\nNetworkX cliques\nVelocity vs peers"]
     end
 
-    MLSCORER --> FRAUDENG
-    MLSCORER --> CLAIMS
-    MLSCORER --> RISK
-    MLSCORER --> NOTIF
-    MLSCORER --> AUTH
-
-    subgraph OUTPUT [Output Layer]
-        PAYMENT["Payment Service\nRazorpay UPI test\nIdempotency keys"]
-        WORKERAPP["Worker App\nReact Native + Expo\nSensor capture SDK"]
-        ADMINDASH["Admin Dashboard\nReact + Leaflet\nFraud queue + SHAP"]
-        ANALYTICS["Analytics\nDuckDB + Parquet\nLoss ratio"]
+    subgraph ML["🤖 ML Ensemble Scorer"]
+        SCORE["Isolation Forest + GradientBoosting + NetworkX Louvain\nScore = 0.30×GPS + 0.25×Sensor + 0.25×Network + 0.20×Behavioral\nOutput: Auto-approve / Soft-hold / Block"]
     end
 
-    FRAUDENG --> PAYMENT
-    CLAIMS --> WORKERAPP
-    RISK --> ADMINDASH
-    NOTIF --> ANALYTICS
+    subgraph PROC["⚡ Processing Services"]
+        CLAIMS["Claims Service\nAuto-approve / Soft-hold\nBlock > 0.85"]
+        AUTH["Auth\nFirebase OTP\nJWT / Nginx"]
+        FRAUD["Fraud Engine\nVelocity gate\nGrace period\nFingerprint"]
+        RISK["Risk Scoring\nXGBoost + LGB\nSHAP output"]
+        NOTIF["Notifications\nFirebase FCM\nPayout confirm"]
+    end
 
-    WORKERAPP -.->|"Sensor Data (Accel/Gyro)"| FRAUDENG
+    subgraph OUT["📱 Output Layer"]
+        WAPP["Worker App\nReact Native + Expo\nSensor capture SDK"]
+        ADMIN["Admin Dashboard\nReact + Leaflet\nFraud review"]
+        ANALY["Analytics\nDuckDB + Parquet\nLoss ratio"]
+        PAY["Payment Service\nRazorpay UPI test\nMoney transfer"]
+    end
 
-    STORAGE["Storage and Infrastructure\nPostgreSQL + PostGIS / Redis 7 / DuckDB / MongoDB M0 / Docker Compose"]
+    subgraph STORE["🗄️ Storage & Infrastructure"]
+        DB["PostgreSQL + PostGIS"]
+        REDIS["Redis 7"]
+        DUCK["DuckDB"]
+        MONGO["MongoDB M0"]
+        DOCK["Docker Compose"]
+    end
 
-    PAYMENT --> STORAGE
-    WORKERAPP --> STORAGE
-    ADMINDASH --> STORAGE
-    ANALYTICS --> STORAGE
+    OWM --> TE
+    CPCB --> TE
+    IMD --> TE
+    IPAPI --> TE
+    OSM --> TE
 
-    style REDPANDA fill:#e1d5e7,stroke:#6d3ab5,color:#000000
-    style MLSCORER fill:#e1d5e7,stroke:#6d3ab5,color:#000000
-    style GPS fill:#f8cecc,stroke:#b85450,color:#000000
-    style SENSOR fill:#ffe6cc,stroke:#d6b656,color:#000000
-    style NETGEO fill:#dae8fc,stroke:#6c8ebf,color:#000000
-    style BEHAV fill:#d5e8d4,stroke:#82b366,color:#000000
-    style STORAGE fill:#f5f5f5,stroke:#888780,color:#000000
+    TE --> RP
+
+    RP --> GPS
+    RP --> SENS
+    RP --> NET
+    RP --> BEH
+
+    GPS --> SCORE
+    SENS --> SCORE
+    NET --> SCORE
+    BEH --> SCORE
+
+    SCORE --> CLAIMS
+    SCORE --> AUTH
+    CLAIMS --> FRAUD
+    CLAIMS --> RISK
+    CLAIMS --> NOTIF
+
+    FRAUD --> PAY
+    RISK --> ADMIN
+    NOTIF --> WAPP
+
+    PAY --> OUT
+    ADMIN --> OUT
+    ANALY --> OUT
+
+    WAPP -.->|sensor data feed| FRAUD
+
+    CLAIMS --> DB
+    RISK --> DB
+    PAY --> DB
+    ANALY --> DUCK
+    AUTH --> REDIS
+
+    style ADE fill:#3d2e00,stroke:#f0a500,color:#f0a500
+    style ML fill:#1e1b4b,stroke:#818cf8,color:#c7d2fe
+    style PROC fill:#1a2e1a,stroke:#4ade80,color:#86efac
+    style EXT fill:#1e1e1e,stroke:#888,color:#ccc
+    style TRIGGER fill:#1e1e1e,stroke:#888,color:#ccc
+    style KAFKA fill:#2d1f4e,stroke:#a78bfa,color:#ddd8fe
+    style OUT fill:#1a2e1a,stroke:#4ade80,color:#86efac
+    style STORE fill:#1e1e1e,stroke:#888,color:#aaa
+```
 ```
 
 ---
