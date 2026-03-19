@@ -419,6 +419,7 @@ flowchart TD
 ```mermaid
 flowchart TD
     subgraph EXT [External Data Sources]
+        direction LR
         OWM["OpenWeatherMap\nRain / Temp / Wind"]
         CPCB["CPCB Portal\nAQI Real-time"]
         NDMA["NDMA + IMD RSS\nFlood and Alert Feeds"]
@@ -437,6 +438,7 @@ flowchart TD
     TRIGGER --> REDPANDA
 
     subgraph DEFENSE [Adversarial Defense Engine - NEW]
+        direction LR
         GPS["GPS Physics\n(Accuracy / Cold-start)"]
         SENSOR["Device Sensors\n(Accel / Gyro / Mock Flag)"]
         NETGEO["Network Geo\n(IP / Carrier / Towers)"]
@@ -456,6 +458,7 @@ flowchart TD
     BEHAV --> MLSCORER
 
     subgraph PROC [Processing Services]
+        direction LR
         FRAUDENG["Fraud Engine\n(Velocity & Fingerprint)"]
         CLAIMS["Claims Service\n(Approve / Hold / Block)"]
         RISK["Risk Scoring\n(XGBoost + SHAP)"]
@@ -470,6 +473,7 @@ flowchart TD
     MLSCORER --> AUTH
 
     subgraph OUTPUT [Output Layer]
+        direction LR
         PAYMENT["Payment Service\nRazorpay UPI test\nIdempotency keys"]
         WORKERAPP["Worker App\nReact Native + Expo\nSensor capture SDK"]
         ADMINDASH["Admin Dashboard\nReact + Leaflet\nFraud queue + SHAP"]
@@ -481,7 +485,7 @@ flowchart TD
     RISK --> ADMINDASH
     NOTIF --> ANALYTICS
 
-    WORKERAPP -. "sensor data: accel + gyro + GPS" .-> FRAUDENG
+    WORKERAPP -.->|"Sensor Data (Accel/Gyro)"| FRAUDENG
 
     STORAGE["Storage and Infrastructure\nPostgreSQL + PostGIS / Redis 7 / DuckDB / MongoDB M0 / Docker Compose"]
 
