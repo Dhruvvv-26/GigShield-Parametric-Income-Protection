@@ -726,7 +726,7 @@ Open directly in any modern browser — zero server, zero dependencies, zero ins
 - [x] **AFTER draw.io architecture** — Section 7, importable XML showing the hardened 4-layer defense + full microservices
 - [x] **Working prototype** — `prototype/GigShield_working_prototype.html`
 - [x] **Phase 1 scope respected** — No fake code, no premature implementation claims
-- [ ] 2-minute pitch video — due March 20, 11:59 PM (script in `VIDEO_SCRIPT.md`)
+- [ ] 2-minute pitch video — due March 20, 11:59 PM 
 
 ---
 
