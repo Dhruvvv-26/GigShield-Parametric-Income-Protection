@@ -673,41 +673,34 @@ Open directly in any modern browser — zero server, zero dependencies, zero ins
 
 ---
 
-## 12. Tech Stack — 100% Free, All Verified
+## 12. Tech Stack
 
-All technologies are free for the full 6-week hackathon. Every API rate limit has been verified against actual usage.
-
-| Category | Technology | Role | Cost |
-|---|---|---|---|
-| Worker app | React Native + Expo Go | Rider-facing mobile, sensor capture | Free |
-| Admin dashboard | React + Vite + Tailwind + Recharts | Admin analytics, fraud queue, heatmap | Free |
-| Maps | Leaflet.js + OpenStreetMap | Zone risk heatmap | Free |
-| Backend (all services) | Python FastAPI | 11 microservices, async, OpenAPI docs | Free |
-| Premium ML | XGBoost + LightGBM | Pricing ensemble | Free (pip) |
-| Fraud ML | scikit-learn Isolation Forest + GradientBoosting | Pre-payout fraud scoring | Free (pip) |
-| Prediction ML | PyTorch LSTM | 7-day disruption forecast | Free (pip) |
-| Explainability | SHAP | Waterfall charts for premium + fraud | Free (pip) |
-| ML training | Google Colab T4 GPU | Offline training, 1×/phase | Free |
-| ML tracking | MLflow (Docker) | Experiment versioning | Free |
-| Database | Supabase free tier / PostgreSQL | All structured data | Free (500MB) |
-| Geospatial | PostGIS | Zone boundary queries (ST_Within) | Free |
-| Cache | Redis 7 (Docker) | Score cache, dedup locks | Free |
-| Queue | Redpanda (Docker) | Kafka-compatible event stream | Free |
-| Analytics | DuckDB | Sub-second OLAP, replaces Redshift | Free |
-| Docs store | MongoDB Atlas M0 | Alert feeds, NLP events | Free |
-| Payments | Razorpay test mode | UPI simulation + webhooks | Free |
-| Auth | Firebase Auth (phone OTP) | Rider authentication | Free |
-| Push | Firebase FCM | Payout notifications | Free |
-| Weather | OpenWeatherMap | Rain, temp, wind | Free (1K/day) |
-| AQI | CPCB portal | India govt AQI | Free, no limit |
-| AQI backup | IQAir free tier | Validation backup | Free (10K/mo) |
-| Govt alerts | NDMA + IMD RSS | Flood, cyclone, heatwave alerts | Free, no limit |
-| Geo-IP fraud | ip-api.com | IP vs GPS mismatch | Free (1K/day) |
-| Zone data | OpenStreetMap GeoJSON | Loaded once into PostGIS at startup | Free |
-| Hosting | Railway.app | Backend HTTPS (public URL for judges) | Free ($5 credit) |
-| Frontend hosting | Vercel | React dashboard | Free |
-| CI/CD | GitHub Actions | Test + deploy on push | Free (2K min/mo) |
-| Containers | Docker Compose | Starts all 11 services with one command | Free |
+| Category | Technology | Why |
+|---|---|---|
+| Worker App | React Native + Expo Go | Rider-facing mobile app with sensor capture (GPS, accelerometer, gyroscope) |
+| Admin Dashboard | React + Vite + Leaflet + Recharts | Real-time fraud queue, SHAP charts, and zone risk heatmap |
+| Backend | Python FastAPI | 11 async microservices with auto-generated OpenAPI docs |
+| Premium ML | XGBoost + LightGBM ensemble | Personalized weekly premium pricing with SHAP explainability |
+| Fraud ML | Isolation Forest + GradientBoosting | Unsupervised anomaly detection + supervised fraud classification |
+| Prediction ML | PyTorch LSTM | 7-day disruption probability forecast from 15-day weather sequences |
+| Explainability | SHAP | Waterfall charts showing premium breakdown per rider — IRDAI compliant |
+| ML Training | Google Colab T4 GPU | Offline model training on synthetic datasets, exported as `.pkl` |
+| Primary Database | PostgreSQL + PostGIS | Structured data storage + geospatial zone match queries (`ST_Within`) |
+| Cache | Redis 7 | Score caching and deduplication locks for event stream |
+| Event Queue | Redpanda | Kafka-compatible event stream — single Docker container, no Zookeeper |
+| Analytics | DuckDB + Parquet | Sub-second OLAP queries for loss ratio and actuarial reporting |
+| Document Store | MongoDB Atlas M0 | Alert feed storage and NLP event documents |
+| Payments | Razorpay (test mode) | UPI payout simulation with idempotency keys and webhooks |
+| Auth | Firebase Auth (OTP) | Phone-based rider authentication with JWT tokens via Nginx |
+| Push Notifications | Firebase FCM | Instant payout and soft-hold status alerts to riders |
+| Weather API | OpenWeatherMap | Rain, temperature, and wind data — 15-min APScheduler polling |
+| AQI API | CPCB Portal | India government real-time AQI — no rate limit |
+| Govt Alerts | NDMA + IMD RSS | Flood, cyclone, and heatwave alerts — no rate limit |
+| Geo-IP Fraud | ip-api.com | IP-to-GPS delta check for network geolocation fraud layer |
+| Zone Boundaries | OpenStreetMap GeoJSON | Loaded once into PostGIS at startup for zone boundary matching |
+| Hosting | Railway.app + Vercel | Backend HTTPS endpoint (judges) + React dashboard |
+| CI/CD | GitHub Actions | Automated test and deploy pipeline on every push |
+| Containers | Docker Compose | Single command starts all 11 services locally |
 
 ---
 
