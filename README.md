@@ -364,115 +364,135 @@ If GPS pings stop during an active disruption event AND the last recorded ping w
 
 ## 6. System Architecture — Before Market Crash
 
-> The original architecture used a **single GPS zone check** as the only fraud gate. This is the single point of failure the 500-rider syndicate exploited. A mock GPS app defeats it in under 30 seconds.
+> The original architecture used a **single GPS zone check** as the only fraud gate. The entire system came down to a single boolean: is this coordinate inside the 2km zone? A mock GPS app defeats it in under 30 seconds — no satellite required, just an OS-level coordinate injection. This is why the 500-rider syndicate succeeded against competitor platforms while the real disruption event was genuine.
 
-**How to view:** Copy XML below → open [draw.io](https://app.diagrams.net) → `Extras → Edit Diagram` → paste → `OK`
+```mermaid
+flowchart TD
+    OWM["☁️ OpenWeatherMap\nRain · Temp · Wind"]
+    CPCB["🏭 CPCB Portal\nAQI Real-time"]
+    NDMA["🚨 NDMA / IMD RSS\nGovt Alerts"]
 
-```xml
-<mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
-  <root>
-    <mxCell id="0"/><mxCell id="1" parent="0"/>
-    <mxCell id="title" value="GigShield — BEFORE Market Crash (Vulnerable Single-Layer GPS Defense)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#b85450;fontSize=14;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="80" y="10" width="980" height="30" as="geometry"/></mxCell>
-    <mxCell id="owm" value="OpenWeatherMap&#xa;Rain · Temp · Wind" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1"><mxGeometry x="40" y="60" width="150" height="44" as="geometry"/></mxCell>
-    <mxCell id="cpcb" value="CPCB Portal&#xa;AQI Real-time" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1"><mxGeometry x="210" y="60" width="150" height="44" as="geometry"/></mxCell>
-    <mxCell id="ndma" value="NDMA / IMD RSS&#xa;Govt Alerts" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1"><mxGeometry x="380" y="60" width="150" height="44" as="geometry"/></mxCell>
-    <mxCell id="gov" value="Govt Feeds&#xa;Curfew / Bandh" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1"><mxGeometry x="550" y="60" width="150" height="44" as="geometry"/></mxCell>
-    <mxCell id="arr-owm" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#6c8ebf;" edge="1" parent="1" source="owm" target="trigger"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="arr-cpcb" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#6c8ebf;" edge="1" parent="1" source="cpcb" target="trigger"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="arr-ndma" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#6c8ebf;" edge="1" parent="1" source="ndma" target="trigger"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="arr-gov" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#6c8ebf;" edge="1" parent="1" source="gov" target="trigger"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="trigger" value="Trigger Engine&#xa;APScheduler · PostGIS zone match" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="220" y="160" width="400" height="56" as="geometry"/></mxCell>
-    <mxCell id="arr-trig-gps" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#82b366;strokeWidth=2;" edge="1" parent="1" source="trigger" target="gps-box"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="spof-bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=3;" vertex="1" parent="1"><mxGeometry x="120" y="270" width="600" height="120" as="geometry"/></mxCell>
-    <mxCell id="spof-label" value="⚠ SINGLE POINT OF FAILURE" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=12;fontStyle=1;fontColor=#b85450;" vertex="1" parent="1"><mxGeometry x="120" y="275" width="600" height="20" as="geometry"/></mxCell>
-    <mxCell id="gps-box" value="GPS Zone Check — ONLY DEFENSE&#xa;Is worker coordinate inside 2km radius? YES → approve.&#xa;Defeated by mock GPS apps in &lt; 30 seconds." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="1"><mxGeometry x="140" y="298" width="560" height="80" as="geometry"/></mxCell>
-    <mxCell id="attacker" value="500-rider syndicate&#xa;Telegram coordination&#xa;Fake GPS · GPS JoyStick&#xa;At home, spoofing zone coords" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=10;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="800" y="278" width="200" height="100" as="geometry"/></mxCell>
-    <mxCell id="arr-attack" value="Spoofed GPS passes check" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#b85450;strokeWidth=2;dashed=1;fontColor=#b85450;fontSize=10;" edge="1" parent="1" source="attacker" target="gps-box"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="arr-gps-pay" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#82b366;strokeWidth=2;" edge="1" parent="1" source="gps-box" target="payout"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="payout" value="Razorpay UPI Payout + FCM Push" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="220" y="440" width="400" height="50" as="geometry"/></mxCell>
-    <mxCell id="result-box" value="RESULT: Liquidity pool drained. 500 false payouts approved." style="text;html=1;strokeColor=#b85450;fillColor=#f8cecc;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=12;fontStyle=1;fontColor=#b85450;" vertex="1" parent="1"><mxGeometry x="120" y="510" width="600" height="40" as="geometry"/></mxCell>
-    <mxCell id="db-before" value="PostgreSQL · Redis · Docker Compose" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#888780;fontSize=10;" vertex="1" parent="1"><mxGeometry x="120" y="570" width="600" height="36" as="geometry"/></mxCell>
-  </root>
-</mxGraphModel>
+    OWM --> TRIGGER
+    CPCB --> TRIGGER
+    NDMA --> TRIGGER
+
+    TRIGGER["⚙️ Trigger Engine\nAPScheduler 15-min poll · PostGIS zone match · Threshold check"]
+
+    TRIGGER --> GPSCHECK
+
+    FRAUD["🦹 Fraud Syndicate\n500 riders · Telegram coordination\nFake GPS · GPS JoyStick\nAt home, spoofing zone coords"]
+
+    FRAUD -. "spoofed GPS coordinate passes check" .-> GPSCHECK
+
+    GPSCHECK["⚠️ GPS Zone Check — SINGLE POINT OF FAILURE\nIs coordinate inside 2km radius? YES = approve\nDefeated by mock GPS in < 30 seconds"]
+
+    GPSCHECK --> PAYOUT
+
+    PAYOUT["💸 Razorpay UPI Payout + FCM Push"]
+
+    PAYOUT --> DB
+
+    DB["🗄️ PostgreSQL · Redis · Docker Compose"]
+
+    RESULT["🔴 RESULT: Liquidity pool drained — 500 false payouts approved"]
+
+    DB --> RESULT
+
+    style GPSCHECK fill:#f8cecc,stroke:#b85450,color:#b85450
+    style RESULT fill:#f8cecc,stroke:#b85450,color:#b85450
+    style FRAUD fill:#ffe6cc,stroke:#d6b656
 ```
 
 ---
 
 ## 7. System Architecture — After Market Crash
 
-> The upgraded architecture adds **four independent signal layers** that cannot be simultaneously defeated. GPS is now one of sixteen checks. The adversarial defense engine sits between the event stream and the payout service, processing every claim before any money moves.
+> The upgraded architecture inserts a 4-layer adversarial defense engine between the event stream and the payment service. GPS is now one of sixteen checks — each targeting a signal source that cannot be simultaneously faked without hardware that costs more than any payout. The defense engine runs in under 60 seconds. No payout moves until the ML ensemble scorer approves it.
 
-**How to view:** Copy XML below → open [draw.io](https://app.diagrams.net) → `Extras → Edit Diagram` → paste → `OK`
+```mermaid
+flowchart TD
+    subgraph EXT ["🌐 External Data Sources"]
+        direction LR
+        OWM["OpenWeatherMap\nRain · Temp · Wind"]
+        CPCB["CPCB Portal\nAQI Real-time"]
+        NDMA["NDMA + IMD RSS\nFlood & Alert Feeds"]
+        IPAPI["ip-api.com\nNetwork Geo (fraud)"]
+        OSM["OpenStreetMap GeoJSON\nZone boundaries"]
+    end
 
-```xml
-<mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1400" math="0" shadow="0">
-  <root>
-    <mxCell id="0"/><mxCell id="1" parent="0"/>
-    <mxCell id="title" value="GigShield — AFTER Market Crash (4-Layer Adversarial Defense + Full Microservices)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;fontColor=#0a3d2e;" vertex="1" parent="1"><mxGeometry x="80" y="12" width="1460" height="30" as="geometry"/></mxCell>
-    <mxCell id="ext-bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#888780;strokeWidth=1;dashed=1;" vertex="1" parent="1"><mxGeometry x="40" y="56" width="1540" height="70" as="geometry"/></mxCell>
-    <mxCell id="ext-lbl" value="EXTERNAL DATA SOURCES" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=9;fontStyle=1;fontColor=#888780;" vertex="1" parent="1"><mxGeometry x="52" y="60" width="200" height="16" as="geometry"/></mxCell>
-    <mxCell id="owm" value="OpenWeatherMap&#xa;Rain · Temp · Wind" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1"><mxGeometry x="60" y="76" width="200" height="40" as="geometry"/></mxCell>
-    <mxCell id="cpcb" value="CPCB Portal&#xa;AQI Real-time" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1"><mxGeometry x="280" y="76" width="200" height="40" as="geometry"/></mxCell>
-    <mxCell id="ndma" value="NDMA + IMD RSS&#xa;Flood and Alert Feeds" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1"><mxGeometry x="500" y="76" width="200" height="40" as="geometry"/></mxCell>
-    <mxCell id="ipapi" value="ip-api.com&#xa;Network Geo (fraud)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1"><mxGeometry x="720" y="76" width="200" height="40" as="geometry"/></mxCell>
-    <mxCell id="osm" value="OpenStreetMap GeoJSON&#xa;Zone boundaries (PostGIS)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1"><mxGeometry x="940" y="76" width="200" height="40" as="geometry"/></mxCell>
-    <mxCell id="firebase" value="Firebase FCM&#xa;Push notifications" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1"><mxGeometry x="1160" y="76" width="200" height="40" as="geometry"/></mxCell>
-    <mxCell id="ing-bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fff8;strokeColor=#00C9B1;strokeWidth=2;dashed=1;" vertex="1" parent="1"><mxGeometry x="40" y="176" width="1540" height="86" as="geometry"/></mxCell>
-    <mxCell id="ing-lbl" value="INGESTION LAYER" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=9;fontStyle=1;fontColor=#00C9B1;" vertex="1" parent="1"><mxGeometry x="52" y="180" width="160" height="16" as="geometry"/></mxCell>
-    <mxCell id="trigger" value="Trigger Engine&#xa;APScheduler 15-min poll · PostGIS ST_Within zone match · Threshold check · Sustained breach validation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#00C9B1;strokeWidth=2;fontSize=11;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="320" y="196" width="980" height="56" as="geometry"/></mxCell>
-    <mxCell id="arr-ext-trig" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#00C9B1;strokeWidth=1.5;" edge="1" parent="1" source="ndma" target="trigger"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="arr-ipapi-trig" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d6b656;strokeWidth=1.5;" edge="1" parent="1" source="ipapi" target="defense-bg"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="arr-trig-rp" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#6d3ab5;strokeWidth=2;" edge="1" parent="1" source="trigger" target="redpanda"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="redpanda" value="Redpanda — Kafka-Compatible Event Stream&#xa;Topic: processed.trigger.events · Fan-out to all consumers · Redis dedup locks" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#6d3ab5;strokeWidth=2;fontSize=11;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="40" y="312" width="1540" height="56" as="geometry"/></mxCell>
-    <mxCell id="defense-bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff8e1;strokeColor=#d6b656;strokeWidth=2;" vertex="1" parent="1"><mxGeometry x="40" y="416" width="1540" height="256" as="geometry"/></mxCell>
-    <mxCell id="def-lbl" value="ADVERSARIAL DEFENSE ENGINE — NEW AFTER MARKET CRASH — 4 Independent Signal Layers Cannot Be Simultaneously Defeated" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=11;fontStyle=1;fontColor=#856404;" vertex="1" parent="1"><mxGeometry x="40" y="420" width="1540" height="22" as="geometry"/></mxCell>
-    <mxCell id="gps-layer" value="GPS Physics&#xa;• Satellite variance σ &lt; 0.5m → flag&#xa;• Accuracy radius = 0m → spoofed&#xa;• Instant lock, no cold start → flag&#xa;• Path vs OSM road geometry" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=1.5;fontSize=10;" vertex="1" parent="1"><mxGeometry x="60" y="452" width="340" height="200" as="geometry"/></mxCell>
-    <mxCell id="sensor-layer" value="Device Sensors&#xa;• Accelerometer RMS cycling: 0.8–2.4&#xa;• Accelerometer RMS home: &lt; 0.3&#xa;• Gyro yaw vs GPS heading delta&#xa;• ALLOW_MOCK_LOCATION flag check" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;strokeWidth=1.5;fontSize=10;" vertex="1" parent="1"><mxGeometry x="420" y="452" width="340" height="200" as="geometry"/></mxCell>
-    <mxCell id="network-layer" value="Network Geo&#xa;• IP vs GPS delta &gt; 4km → flag&#xa;• Cell tower handoff count = 0 → flag&#xa;• Carrier subnet cross-check&#xa;• ip-api.com (1K free calls/day)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1.5;fontSize=10;" vertex="1" parent="1"><mxGeometry x="780" y="452" width="340" height="200" as="geometry"/></mxCell>
-    <mxCell id="behav-layer" value="Behavioral&#xa;• Pre-event residency check T-30min&#xa;• Burst &gt; 150 claims in 90s → quarantine&#xa;• NetworkX graph clique detection&#xa;• Velocity vs zone peer median" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1.5;fontSize=10;" vertex="1" parent="1"><mxGeometry x="1140" y="452" width="420" height="200" as="geometry"/></mxCell>
-    <mxCell id="arr-rp-gps" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#b85450;strokeWidth=1.5;" edge="1" parent="1" source="redpanda" target="gps-layer"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="arr-rp-sens" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d6b656;strokeWidth=1.5;" edge="1" parent="1" source="redpanda" target="sensor-layer"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="arr-rp-net" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#6c8ebf;strokeWidth=1.5;" edge="1" parent="1" source="redpanda" target="network-layer"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="arr-rp-beh" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#82b366;strokeWidth=1.5;" edge="1" parent="1" source="redpanda" target="behav-layer"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="arr-gps-ml" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#6d3ab5;strokeWidth=1.5;" edge="1" parent="1" source="gps-layer" target="ml-scorer"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="arr-sens-ml" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#6d3ab5;strokeWidth=1.5;" edge="1" parent="1" source="sensor-layer" target="ml-scorer"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="arr-net-ml" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#6d3ab5;strokeWidth=1.5;" edge="1" parent="1" source="network-layer" target="ml-scorer"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="arr-beh-ml" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#6d3ab5;strokeWidth=1.5;" edge="1" parent="1" source="behav-layer" target="ml-scorer"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="ml-scorer" value="ML Ensemble Scorer&#xa;Isolation Forest (unsupervised anomaly) · GradientBoosting Classifier · NetworkX Louvain Clique Density&#xa;Score = 0.30·GPS + 0.25·Sensor + 0.25·Network + 0.20·Behavioral → Auto-approve / Soft-hold / Block" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#6d3ab5;strokeWidth=2;fontSize=11;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="200" y="730" width="1220" height="60" as="geometry"/></mxCell>
-    <mxCell id="arr-ml-proc" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#00C9B1;strokeWidth=2;" edge="1" parent="1" source="ml-scorer" target="claims"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="fraud-svc" value="Fraud Engine&#xa;GPS velocity gate&#xa;45-min grace period&#xa;Device fingerprint" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#00C9B1;strokeWidth=1.5;fontSize=10;" vertex="1" parent="1"><mxGeometry x="40" y="856" width="280" height="100" as="geometry"/></mxCell>
-    <mxCell id="claims" value="Claims Service&#xa;Auto-approve (score &lt; 0.65)&#xa;Soft hold 50%+50% (0.65–0.85)&#xa;Block (score &gt; 0.85)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#00C9B1;strokeWidth=1.5;fontSize=10;" vertex="1" parent="1"><mxGeometry x="340" y="856" width="280" height="100" as="geometry"/></mxCell>
-    <mxCell id="risk-svc" value="Risk Scoring Engine&#xa;XGBoost + LightGBM premium&#xa;SHAP explainability&#xa;IRDAI-compliant output" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#00C9B1;strokeWidth=1.5;fontSize=10;" vertex="1" parent="1"><mxGeometry x="640" y="856" width="280" height="100" as="geometry"/></mxCell>
-    <mxCell id="notif-svc" value="Notification Service&#xa;Firebase FCM push&#xa;Payout confirmed&#xa;Soft-hold status update" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#00C9B1;strokeWidth=1.5;fontSize=10;" vertex="1" parent="1"><mxGeometry x="940" y="856" width="280" height="100" as="geometry"/></mxCell>
-    <mxCell id="auth-svc" value="Auth Service&#xa;Firebase OTP&#xa;JWT tokens&#xa;Nginx gateway" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#00C9B1;strokeWidth=1.5;fontSize=10;" vertex="1" parent="1"><mxGeometry x="1240" y="856" width="280" height="100" as="geometry"/></mxCell>
-    <mxCell id="arr-rp-fraud" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#00C9B1;strokeWidth=1.5;" edge="1" parent="1" source="redpanda" target="fraud-svc"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="arr-rp-risk" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#00C9B1;strokeWidth=1.5;" edge="1" parent="1" source="redpanda" target="risk-svc"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="arr-rp-notif" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#00C9B1;strokeWidth=1.5;" edge="1" parent="1" source="redpanda" target="notif-svc"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="payment" value="Payment Service&#xa;Razorpay UPI (test mode)&#xa;Idempotency keys&#xa;Retry with backoff" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#6d3ab5;strokeWidth=1.5;fontSize=10;" vertex="1" parent="1"><mxGeometry x="40" y="1020" width="280" height="90" as="geometry"/></mxCell>
-    <mxCell id="worker-app" value="Worker App&#xa;React Native + Expo Go&#xa;Sensor capture SDK&#xa;GPS + Accel + Gyro" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#6d3ab5;strokeWidth=1.5;fontSize=10;" vertex="1" parent="1"><mxGeometry x="340" y="1020" width="280" height="90" as="geometry"/></mxCell>
-    <mxCell id="admin-dash" value="Admin Dashboard&#xa;React + Vite + Leaflet&#xa;Fraud queue + SHAP charts&#xa;Zone heatmap" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#6d3ab5;strokeWidth=1.5;fontSize=10;" vertex="1" parent="1"><mxGeometry x="640" y="1020" width="280" height="90" as="geometry"/></mxCell>
-    <mxCell id="analytics" value="Analytics Service&#xa;DuckDB + Parquet&#xa;Loss ratio dashboard&#xa;Actuarial reporting" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#6d3ab5;strokeWidth=1.5;fontSize=10;" vertex="1" parent="1"><mxGeometry x="940" y="1020" width="280" height="90" as="geometry"/></mxCell>
-    <mxCell id="arr-claims-pay" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#6d3ab5;strokeWidth=1.5;" edge="1" parent="1" source="claims" target="payment"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="arr-fraud-wa" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#6d3ab5;strokeWidth=1.5;" edge="1" parent="1" source="fraud-svc" target="worker-app"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="arr-risk-admin" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#6d3ab5;strokeWidth=1.5;" edge="1" parent="1" source="risk-svc" target="admin-dash"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="arr-notif-an" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#6d3ab5;strokeWidth=1.5;" edge="1" parent="1" source="notif-svc" target="analytics"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="storage-bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#888780;strokeWidth=1;" vertex="1" parent="1"><mxGeometry x="40" y="1170" width="1540" height="56" as="geometry"/></mxCell>
-    <mxCell id="pg" value="PostgreSQL + PostGIS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#888780;fontSize=10;" vertex="1" parent="1"><mxGeometry x="60" y="1180" width="220" height="36" as="geometry"/></mxCell>
-    <mxCell id="redis" value="Redis 7 (cache + locks)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#888780;fontSize=10;" vertex="1" parent="1"><mxGeometry x="300" y="1180" width="220" height="36" as="geometry"/></mxCell>
-    <mxCell id="duckdb" value="DuckDB + Parquet" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#888780;fontSize=10;" vertex="1" parent="1"><mxGeometry x="540" y="1180" width="220" height="36" as="geometry"/></mxCell>
-    <mxCell id="mongo" value="MongoDB Atlas M0 (free)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#888780;fontSize=10;" vertex="1" parent="1"><mxGeometry x="780" y="1180" width="220" height="36" as="geometry"/></mxCell>
-    <mxCell id="docker" value="Docker Compose · 11 services" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#888780;fontSize=10;" vertex="1" parent="1"><mxGeometry x="1020" y="1180" width="220" height="36" as="geometry"/></mxCell>
-    <mxCell id="railway" value="Railway.app (free hosting)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#888780;fontSize=10;" vertex="1" parent="1"><mxGeometry x="1260" y="1180" width="220" height="36" as="geometry"/></mxCell>
-    <mxCell id="leg-bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#888780;" vertex="1" parent="1"><mxGeometry x="1380" y="420" width="196" height="164" as="geometry"/></mxCell>
-    <mxCell id="leg-t" value="LEGEND" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="1380" y="426" width="196" height="18" as="geometry"/></mxCell>
-    <mxCell id="l1" value="External / storage" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#888780;fontSize=9;" vertex="1" parent="1"><mxGeometry x="1388" y="450" width="180" height="24" as="geometry"/></mxCell>
-    <mxCell id="l2" value="Processing (teal)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#00C9B1;fontSize=9;" vertex="1" parent="1"><mxGeometry x="1388" y="480" width="180" height="24" as="geometry"/></mxCell>
-    <mxCell id="l3" value="Event queue / output (purple)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#6d3ab5;fontSize=9;" vertex="1" parent="1"><mxGeometry x="1388" y="510" width="180" height="24" as="geometry"/></mxCell>
-    <mxCell id="l4" value="Adversarial defense (yellow) — NEW" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff8e1;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="1"><mxGeometry x="1388" y="540" width="180" height="24" as="geometry"/></mxCell>
-    <mxCell id="l5" value="Ingestion (light green) — unchanged" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fff8;strokeColor=#00C9B1;fontSize=9;" vertex="1" parent="1"><mxGeometry x="1388" y="570" width="180" height="24" as="geometry"/></mxCell>
-  </root>
-</mxGraphModel>
+    subgraph ING ["⚙️ Ingestion Layer"]
+        TRIGGER["Trigger Engine\nAPScheduler 15-min poll · PostGIS ST_Within · threshold check · sustained breach validation"]
+    end
+
+    EXT --> TRIGGER
+
+    REDPANDA["🟣 Redpanda — Kafka-Compatible Event Stream\nTopic: processed.trigger.events · fan-out to all consumers · Redis dedup locks"]
+
+    TRIGGER --> REDPANDA
+
+    subgraph DEFENSE ["🛡️ Adversarial Defense Engine — NEW after Market Crash"]
+        direction LR
+        GPS["🔴 GPS Physics\nVariance σ · Accuracy radius\nCold-start time · OSM path match"]
+        SENSOR["🟠 Device Sensors\nAccel RMS · Gyro yaw delta\nMock GPS flag · SDK check"]
+        NETGEO["🔵 Network Geo\nIP vs GPS delta · Tower handoffs\nCarrier subnet · ip-api.com"]
+        BEHAV["🟢 Behavioral\nT−30 residency · Burst >150/90s\nNetworkX cliques · Velocity vs peers"]
+    end
+
+    REDPANDA --> GPS
+    REDPANDA --> SENSOR
+    REDPANDA --> NETGEO
+    REDPANDA --> BEHAV
+
+    MLSCORER["🟣 ML Ensemble Scorer\nIsolation Forest · GradientBoosting Classifier · NetworkX Louvain\nScore = 0.30·GPS + 0.25·Sensor + 0.25·Network + 0.20·Behavioral → Auto-approve / Soft-hold / Block"]
+
+    GPS --> MLSCORER
+    SENSOR --> MLSCORER
+    NETGEO --> MLSCORER
+    BEHAV --> MLSCORER
+
+    subgraph PROC ["⚙️ Processing Services"]
+        direction LR
+        FRAUDENG["Fraud Engine\nVelocity gate · Grace period\nDevice fingerprint"]
+        CLAIMS["Claims Service\nAuto-approve / Soft-hold 50%\nBlock > 0.85"]
+        RISK["Risk Scoring\nXGBoost + LGB\nSHAP output"]
+        NOTIF["Notification\nFirebase FCM\nPayout confirm"]
+        AUTH["Auth\nFirebase OTP\nJWT · Nginx"]
+    end
+
+    MLSCORER --> PROC
+
+    subgraph OUTPUT ["📤 Output Layer"]
+        direction LR
+        PAYMENT["Payment Service\nRazorpay UPI test\nIdempotency keys"]
+        WORKERAPP["Worker App\nReact Native + Expo\nSensor capture SDK"]
+        ADMINDASH["Admin Dashboard\nReact + Leaflet\nFraud queue + SHAP"]
+        ANALYTICS["Analytics\nDuckDB + Parquet\nLoss ratio"]
+    end
+
+    PROC --> OUTPUT
+
+    WORKERAPP -. "sensor data (accel + gyro + GPS)" .-> FRAUDENG
+
+    STORAGE["🗄️ Storage / Infra\nPostgreSQL + PostGIS · Redis 7 · DuckDB · MongoDB M0 · Docker Compose"]
+
+    OUTPUT --> STORAGE
+
+    style REDPANDA fill:#e1d5e7,stroke:#6d3ab5,color:#4a2070
+    style MLSCORER fill:#e1d5e7,stroke:#6d3ab5,color:#4a2070
+    style DEFENSE fill:#fff8e1,stroke:#d6b656
+    style GPS fill:#f8cecc,stroke:#b85450
+    style SENSOR fill:#ffe6cc,stroke:#d6b656
+    style NETGEO fill:#dae8fc,stroke:#6c8ebf
+    style BEHAV fill:#d5e8d4,stroke:#82b366
+    style STORAGE fill:#f5f5f5,stroke:#888780
 ```
+
+**Legend:**
+- ⬜ Gray = storage / infrastructure
+- 🟩 Teal = processing services  
+- 🟪 Purple = event queue / ML scorer
+- 🟨 Amber = adversarial defense engine (**NEW** after Market Crash)
+- `- - →` Dashed arrow = critical bidirectional sensor data flow (Worker App → Fraud Engine)
 
 ---
 
