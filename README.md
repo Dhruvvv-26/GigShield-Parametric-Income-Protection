@@ -398,9 +398,9 @@ flowchart TD
 
     RESULT["RESULT: Liquidity pool drained\n500 false payouts approved"]
 
-    style GPSCHECK fill:#f8cecc,stroke:#b85450,color:#b85450
-    style RESULT fill:#f8cecc,stroke:#b85450,color:#b85450
-    style FRAUD fill:#ffe6cc,stroke:#d6b656
+    style GPSCHECK fill:#f8cecc,stroke:#b85450,color:#000000
+    style RESULT fill:#f8cecc,stroke:#b85450,color:#000000
+    style FRAUD fill:#ffe6cc,stroke:#d6b656,color:#000000
 ```
 
 ---
@@ -483,13 +483,13 @@ flowchart TD
     ADMINDASH --> STORAGE
     ANALYTICS --> STORAGE
 
-    style REDPANDA fill:#e1d5e7,stroke:#6d3ab5
-    style MLSCORER fill:#e1d5e7,stroke:#6d3ab5
-    style GPS fill:#f8cecc,stroke:#b85450
-    style SENSOR fill:#ffe6cc,stroke:#d6b656
-    style NETGEO fill:#dae8fc,stroke:#6c8ebf
-    style BEHAV fill:#d5e8d4,stroke:#82b366
-    style STORAGE fill:#f5f5f5,stroke:#888780
+    style REDPANDA fill:#e1d5e7,stroke:#6d3ab5,color:#000000
+    style MLSCORER fill:#e1d5e7,stroke:#6d3ab5,color:#000000
+    style GPS fill:#f8cecc,stroke:#b85450,color:#000000
+    style SENSOR fill:#ffe6cc,stroke:#d6b656,color:#000000
+    style NETGEO fill:#dae8fc,stroke:#6c8ebf,color:#000000
+    style BEHAV fill:#d5e8d4,stroke:#82b366,color:#000000
+    style STORAGE fill:#f5f5f5,stroke:#888780,color:#000000
 ```
 
 **Legend:**
