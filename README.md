@@ -368,35 +368,35 @@ If GPS pings stop during an active disruption event AND the last recorded ping w
 
 ```mermaid
 flowchart TD
-    OWM["☁️ OpenWeatherMap\nRain · Temp · Wind"]
-    CPCB["🏭 CPCB Portal\nAQI Real-time"]
-    NDMA["🚨 NDMA / IMD RSS\nGovt Alerts"]
+    OWM["OpenWeatherMap - Rain / Temp / Wind"]
+    CPCB["CPCB Portal - AQI Real-time"]
+    NDMA["NDMA / IMD RSS - Govt Alerts"]
 
     OWM --> TRIGGER
     CPCB --> TRIGGER
     NDMA --> TRIGGER
 
-    TRIGGER["⚙️ Trigger Engine\nAPScheduler 15-min poll · PostGIS zone match · Threshold check"]
+    TRIGGER["Trigger Engine\nAPScheduler 15-min poll\nPostGIS zone match + Threshold check"]
 
     TRIGGER --> GPSCHECK
 
-    FRAUD["🦹 Fraud Syndicate\n500 riders · Telegram coordination\nFake GPS · GPS JoyStick\nAt home, spoofing zone coords"]
+    FRAUD["Fraud Syndicate\n500 riders - Telegram coordination\nFake GPS / GPS JoyStick\nAt home, spoofing zone coords"]
 
-    FRAUD -. "spoofed GPS coordinate passes check" .-> GPSCHECK
+    FRAUD -. "Spoofed GPS coordinate passes check" .-> GPSCHECK
 
-    GPSCHECK["⚠️ GPS Zone Check — SINGLE POINT OF FAILURE\nIs coordinate inside 2km radius? YES = approve\nDefeated by mock GPS in < 30 seconds"]
+    GPSCHECK["SINGLE POINT OF FAILURE\nGPS Zone Check - ONLY DEFENSE\nIs coordinate inside 2km radius?\nYES = approve\nDefeated by mock GPS in under 30 seconds"]
 
     GPSCHECK --> PAYOUT
 
-    PAYOUT["💸 Razorpay UPI Payout + FCM Push"]
+    PAYOUT["Razorpay UPI Payout + FCM Push"]
 
     PAYOUT --> DB
 
-    DB["🗄️ PostgreSQL · Redis · Docker Compose"]
-
-    RESULT["🔴 RESULT: Liquidity pool drained — 500 false payouts approved"]
+    DB["PostgreSQL / Redis / Docker Compose"]
 
     DB --> RESULT
+
+    RESULT["RESULT: Liquidity pool drained\n500 false payouts approved"]
 
     style GPSCHECK fill:#f8cecc,stroke:#b85450,color:#b85450
     style RESULT fill:#f8cecc,stroke:#b85450,color:#b85450
@@ -411,31 +411,29 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    subgraph EXT ["🌐 External Data Sources"]
-        direction LR
-        OWM["OpenWeatherMap\nRain · Temp · Wind"]
+    subgraph EXT [External Data Sources]
+        OWM["OpenWeatherMap\nRain / Temp / Wind"]
         CPCB["CPCB Portal\nAQI Real-time"]
-        NDMA["NDMA + IMD RSS\nFlood & Alert Feeds"]
-        IPAPI["ip-api.com\nNetwork Geo (fraud)"]
+        NDMA["NDMA + IMD RSS\nFlood and Alert Feeds"]
+        IPAPI["ip-api.com\nNetwork Geo for fraud"]
         OSM["OpenStreetMap GeoJSON\nZone boundaries"]
     end
 
-    subgraph ING ["⚙️ Ingestion Layer"]
-        TRIGGER["Trigger Engine\nAPScheduler 15-min poll · PostGIS ST_Within · threshold check · sustained breach validation"]
+    subgraph ING [Ingestion Layer]
+        TRIGGER["Trigger Engine\nAPScheduler 15-min poll\nPostGIS ST_Within zone match\nThreshold check + sustained breach validation"]
     end
 
     EXT --> TRIGGER
 
-    REDPANDA["🟣 Redpanda — Kafka-Compatible Event Stream\nTopic: processed.trigger.events · fan-out to all consumers · Redis dedup locks"]
+    REDPANDA["Redpanda - Kafka-Compatible Event Stream\nTopic: processed.trigger.events\nFan-out to all consumers + Redis dedup locks"]
 
     TRIGGER --> REDPANDA
 
-    subgraph DEFENSE ["🛡️ Adversarial Defense Engine — NEW after Market Crash"]
-        direction LR
-        GPS["🔴 GPS Physics\nVariance σ · Accuracy radius\nCold-start time · OSM path match"]
-        SENSOR["🟠 Device Sensors\nAccel RMS · Gyro yaw delta\nMock GPS flag · SDK check"]
-        NETGEO["🔵 Network Geo\nIP vs GPS delta · Tower handoffs\nCarrier subnet · ip-api.com"]
-        BEHAV["🟢 Behavioral\nT−30 residency · Burst >150/90s\nNetworkX cliques · Velocity vs peers"]
+    subgraph DEFENSE [Adversarial Defense Engine - NEW after Market Crash]
+        GPS["GPS Physics\nVariance sigma / Accuracy radius\nCold-start time / OSM path match"]
+        SENSOR["Device Sensors\nAccel RMS / Gyro yaw delta\nMock GPS flag / SDK check"]
+        NETGEO["Network Geo\nIP vs GPS delta / Tower handoffs\nCarrier subnet / ip-api.com"]
+        BEHAV["Behavioral\nT-30 residency / Burst over 150 in 90s\nNetworkX cliques / Velocity vs peers"]
     end
 
     REDPANDA --> GPS
@@ -443,43 +441,50 @@ flowchart TD
     REDPANDA --> NETGEO
     REDPANDA --> BEHAV
 
-    MLSCORER["🟣 ML Ensemble Scorer\nIsolation Forest · GradientBoosting Classifier · NetworkX Louvain\nScore = 0.30·GPS + 0.25·Sensor + 0.25·Network + 0.20·Behavioral → Auto-approve / Soft-hold / Block"]
+    MLSCORER["ML Ensemble Scorer\nIsolation Forest + GradientBoosting + NetworkX Louvain\nScore = 0.30 x GPS + 0.25 x Sensor + 0.25 x Network + 0.20 x Behavioral\nAuto-approve / Soft-hold / Block"]
 
     GPS --> MLSCORER
     SENSOR --> MLSCORER
     NETGEO --> MLSCORER
     BEHAV --> MLSCORER
 
-    subgraph PROC ["⚙️ Processing Services"]
-        direction LR
-        FRAUDENG["Fraud Engine\nVelocity gate · Grace period\nDevice fingerprint"]
-        CLAIMS["Claims Service\nAuto-approve / Soft-hold 50%\nBlock > 0.85"]
-        RISK["Risk Scoring\nXGBoost + LGB\nSHAP output"]
+    subgraph PROC [Processing Services]
+        FRAUDENG["Fraud Engine\nVelocity gate / Grace period\nDevice fingerprint"]
+        CLAIMS["Claims Service\nAuto-approve / Soft-hold 50%\nBlock above 0.85"]
+        RISK["Risk Scoring\nXGBoost + LightGBM\nSHAP output"]
         NOTIF["Notification\nFirebase FCM\nPayout confirm"]
-        AUTH["Auth\nFirebase OTP\nJWT · Nginx"]
+        AUTH["Auth\nFirebase OTP / JWT / Nginx"]
     end
 
-    MLSCORER --> PROC
+    MLSCORER --> FRAUDENG
+    MLSCORER --> CLAIMS
+    MLSCORER --> RISK
+    MLSCORER --> NOTIF
+    MLSCORER --> AUTH
 
-    subgraph OUTPUT ["📤 Output Layer"]
-        direction LR
+    subgraph OUTPUT [Output Layer]
         PAYMENT["Payment Service\nRazorpay UPI test\nIdempotency keys"]
         WORKERAPP["Worker App\nReact Native + Expo\nSensor capture SDK"]
         ADMINDASH["Admin Dashboard\nReact + Leaflet\nFraud queue + SHAP"]
         ANALYTICS["Analytics\nDuckDB + Parquet\nLoss ratio"]
     end
 
-    PROC --> OUTPUT
+    FRAUDENG --> PAYMENT
+    CLAIMS --> WORKERAPP
+    RISK --> ADMINDASH
+    NOTIF --> ANALYTICS
 
-    WORKERAPP -. "sensor data (accel + gyro + GPS)" .-> FRAUDENG
+    WORKERAPP -. "sensor data: accel + gyro + GPS" .-> FRAUDENG
 
-    STORAGE["🗄️ Storage / Infra\nPostgreSQL + PostGIS · Redis 7 · DuckDB · MongoDB M0 · Docker Compose"]
+    STORAGE["Storage and Infrastructure\nPostgreSQL + PostGIS / Redis 7 / DuckDB / MongoDB M0 / Docker Compose"]
 
-    OUTPUT --> STORAGE
+    PAYMENT --> STORAGE
+    WORKERAPP --> STORAGE
+    ADMINDASH --> STORAGE
+    ANALYTICS --> STORAGE
 
-    style REDPANDA fill:#e1d5e7,stroke:#6d3ab5,color:#4a2070
-    style MLSCORER fill:#e1d5e7,stroke:#6d3ab5,color:#4a2070
-    style DEFENSE fill:#fff8e1,stroke:#d6b656
+    style REDPANDA fill:#e1d5e7,stroke:#6d3ab5
+    style MLSCORER fill:#e1d5e7,stroke:#6d3ab5
     style GPS fill:#f8cecc,stroke:#b85450
     style SENSOR fill:#ffe6cc,stroke:#d6b656
     style NETGEO fill:#dae8fc,stroke:#6c8ebf
