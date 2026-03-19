@@ -708,10 +708,10 @@ Open directly in any modern browser — zero server, zero dependencies, zero ins
 
 | Name | Role | Specific Ownership |
 |---|---|---|
-| **Dhruv Gupta** *(Lead)* | Product & Architecture | System design, README, pitch deck, coordination |
+| **Dhruv Gupta** *(Lead)* | AI / ML Engineer | XGBoost + LightGBM, Isolation Forest + GradientBoosting, LSTM, SHAP, NetworkX |
 | **Aditya Khandelwal** | Backend Engineer | FastAPI services, Trigger Engine, Razorpay, Redpanda |
-| **Subhrodeep Ghosh** | AI / ML Engineer | XGBoost + LightGBM, Isolation Forest + GradientBoosting, LSTM, SHAP, NetworkX |
-| **Astha Chakraborty** | Frontend Engineer | React Native app, Admin dashboard, Leaflet heatmap, HTML prototype |
+| **Subhrodeep Ghosh** | Frontend Engineer | React Native app, Admin dashboard, Leaflet heatmap |
+| **Astha Chakraborty** | UX/UI & Architecture Research | HTML prototype UX/UI development, System architecture design, and Frontend research |
 | **Parth Nath Chauhan** | Data & Integrations | OpenWeatherMap, CPCB, NDMA, PostGIS zone loading, DuckDB analytics, ip-api.com |
 
 ---
