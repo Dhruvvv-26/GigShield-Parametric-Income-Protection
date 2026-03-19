@@ -409,6 +409,13 @@ flowchart TD
 
 > The upgraded architecture inserts a 4-layer adversarial defense engine between the event stream and the payment service. GPS is now one of sixteen checks — each targeting a signal source that cannot be simultaneously faked without hardware that costs more than any payout. The defense engine runs in under 60 seconds. No payout moves until the ML ensemble scorer approves it.
 
+**Legend:**
+- ⬜ Gray = storage / infrastructure
+- 🟩 Teal = processing services  
+- 🟪 Purple = event queue / ML scorer
+- 🟨 Amber = adversarial defense engine (**NEW** after Market Crash)
+- `- - →` Dashed arrow = critical bidirectional sensor data flow (Worker App → Fraud Engine)
+
 ```mermaid
 flowchart TD
     subgraph EXT [External Data Sources]
@@ -429,11 +436,11 @@ flowchart TD
 
     TRIGGER --> REDPANDA
 
-    subgraph DEFENSE [Adversarial Defense Engine - NEW after Market Crash]
-        GPS["GPS Physics\nVariance sigma / Accuracy radius\nCold-start time / OSM path match"]
-        SENSOR["Device Sensors\nAccel RMS / Gyro yaw delta\nMock GPS flag / SDK check"]
-        NETGEO["Network Geo\nIP vs GPS delta / Tower handoffs\nCarrier subnet / ip-api.com"]
-        BEHAV["Behavioral\nT-30 residency / Burst over 150 in 90s\nNetworkX cliques / Velocity vs peers"]
+    subgraph DEFENSE [Adversarial Defense Engine - NEW]
+        GPS["GPS Physics\n(Accuracy / Cold-start)"]
+        SENSOR["Device Sensors\n(Accel / Gyro / Mock Flag)"]
+        NETGEO["Network Geo\n(IP / Carrier / Towers)"]
+        BEHAV["Behavioral\n(T-30 Burst / Velocity)"]
     end
 
     REDPANDA --> GPS
@@ -441,7 +448,7 @@ flowchart TD
     REDPANDA --> NETGEO
     REDPANDA --> BEHAV
 
-    MLSCORER["ML Ensemble Scorer\nIsolation Forest + GradientBoosting + NetworkX Louvain\nScore = 0.30 x GPS + 0.25 x Sensor + 0.25 x Network + 0.20 x Behavioral\nAuto-approve / Soft-hold / Block"]
+    MLSCORER["ML Ensemble Scorer\n(Isolation Forest + GradientBoosting)\nOutput: Auto-approve / Soft-hold / Block"]
 
     GPS --> MLSCORER
     SENSOR --> MLSCORER
@@ -449,11 +456,11 @@ flowchart TD
     BEHAV --> MLSCORER
 
     subgraph PROC [Processing Services]
-        FRAUDENG["Fraud Engine\nVelocity gate / Grace period\nDevice fingerprint"]
-        CLAIMS["Claims Service\nAuto-approve / Soft-hold 50%\nBlock above 0.85"]
-        RISK["Risk Scoring\nXGBoost + LightGBM\nSHAP output"]
-        NOTIF["Notification\nFirebase FCM\nPayout confirm"]
-        AUTH["Auth\nFirebase OTP / JWT / Nginx"]
+        FRAUDENG["Fraud Engine\n(Velocity & Fingerprint)"]
+        CLAIMS["Claims Service\n(Approve / Hold / Block)"]
+        RISK["Risk Scoring\n(XGBoost + SHAP)"]
+        NOTIF["Notifications\n(Firebase FCM)"]
+        AUTH["Auth\n(OTP / JWT)"]
     end
 
     MLSCORER --> FRAUDENG
@@ -491,13 +498,6 @@ flowchart TD
     style BEHAV fill:#d5e8d4,stroke:#82b366,color:#000000
     style STORAGE fill:#f5f5f5,stroke:#888780,color:#000000
 ```
-
-**Legend:**
-- ⬜ Gray = storage / infrastructure
-- 🟩 Teal = processing services  
-- 🟪 Purple = event queue / ML scorer
-- 🟨 Amber = adversarial defense engine (**NEW** after Market Crash)
-- `- - →` Dashed arrow = critical bidirectional sensor data flow (Worker App → Fraud Engine)
 
 ---
 
