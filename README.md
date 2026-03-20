@@ -728,6 +728,14 @@ Open directly in any modern browser — zero server, zero dependencies, zero ins
 
 ---
 
+## 🔗 Submission Links
+
+- **YT Unlisted video submission link:** [https://youtu.be/SvxXVfBaTIo](https://youtu.be/SvxXVfBaTIo)
+- **Drive Link of the video:** [Google Drive Video Link](https://drive.google.com/file/d/11p0Qzj3ejJncH5XmLfBNeYFsZHFOMOC2/view?usp=sharing)
+- **Drive link of the submission Folder:** [Google Drive Folder Link](https://drive.google.com/drive/folders/1SG2l1yzUukmBRNj9vXgMjR7wZiv5MTma?usp=sharing)
+
+---
+
 ## 14. Submission Checklist
 
 - [x] **Who is our user, really?** — Section 1 answers with Arjun's specific profile, daily economics, and why he is fundamentally different from a food delivery rider
