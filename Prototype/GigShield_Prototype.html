@@ -1,0 +1,619 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --neon:#00d68f;--neon-dim:rgba(0,214,143,0.15);--neon-mid:rgba(0,214,143,0.35);
+  --bg:#050806;--bg2:rgba(13,21,16,0.85);--bg3:rgba(8,14,10,0.92);
+  --border:rgba(0,214,143,0.18);--border-hi:rgba(0,214,143,0.45);
+  --text:#e0ffe8;--text2:#7ab890;--text3:#3d6b50;
+  --red:#ff4d6d;--amber:#f5a623;--blue:#38bdf8;
+}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.app{max-width:980px;margin:0 auto;padding-bottom:2rem}
+.dot-bg{position:fixed;inset:0;background:radial-gradient(circle at center,#1a2e22 1px,transparent 1px);background-size:24px 24px;opacity:.4;pointer-events:none;z-index:0}
+.app>*{position:relative;z-index:1}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(0,214,143,0.3);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:#00a870}
+input[type=range]{width:100%;accent-color:var(--neon);cursor:pointer;height:6px}
+input[type=range]::-webkit-slider-thumb{box-shadow:0 0 10px rgba(0,214,143,.5);transition:transform .1s}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
+select{background:rgba(13,21,16,.9);color:var(--text);border:0.5px solid var(--border);border-radius:8px;padding:9px 12px;width:100%;font-size:13px;font-family:inherit;cursor:pointer;outline:none;transition:border-color .2s,box-shadow .2s}
+select:focus{border-color:var(--neon);box-shadow:0 0 0 3px rgba(0,214,143,.15)}
+.card-ui{background:var(--bg2);backdrop-filter:blur(12px);border:0.5px solid var(--border);border-radius:12px;padding:20px;box-shadow:0 8px 32px rgba(0,0,0,.4);transition:transform .2s,border-color .2s,box-shadow .2s}
+.card-ui:hover{transform:translateY(-2px);border-color:var(--border-hi);box-shadow:0 12px 40px rgba(0,214,143,.08)}
+.hdr{position:sticky;top:0;z-index:100;background:rgba(5,8,6,.92);backdrop-filter:blur(16px);border-bottom:0.5px solid var(--border);padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:54px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:500;font-size:16px;letter-spacing:.5px}
+.logo-sq{width:30px;height:30px;background:var(--neon);border-radius:6px;display:flex;align-items:center;justify-content:center;color:#050806;font-size:15px;font-weight:800;box-shadow:0 0 14px rgba(0,214,143,.6)}
+.logo-sub{font-size:11px;color:var(--text3);font-weight:400;letter-spacing:.3px}
+.sys-status{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--text2)}
+.pulse-dot{width:7px;height:7px;border-radius:50%;background:var(--neon);box-shadow:0 0 8px rgba(0,214,143,.7);animation:pulseAnim 1.4s infinite}
+@keyframes pulseAnim{0%,100%{opacity:1;box-shadow:0 0 8px rgba(0,214,143,.7)}50%{opacity:.5;box-shadow:0 0 3px rgba(0,214,143,.3)}}
+@keyframes barPulse{0%,100%{opacity:1}50%{opacity:.6}}
+.nav{display:flex;background:rgba(5,8,6,.8);border-bottom:0.5px solid var(--border);padding:0 20px;gap:2px}
+.nav-btn{padding:10px 16px;border:none;background:none;color:var(--text2);cursor:pointer;font-size:12px;border-bottom:2px solid transparent;transition:all .2s;font-family:inherit;letter-spacing:.3px}
+.nav-btn:hover{background:rgba(0,214,143,.05);color:var(--neon)}
+.nav-btn.active{color:var(--neon);border-bottom-color:var(--neon);font-weight:500}
+.page{display:none;padding:16px 20px}
+.page.active{display:block}
+.g4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.stat{background:rgba(13,21,16,.7);border:0.5px solid var(--border);border-radius:10px;padding:14px 16px;transition:border-color .2s}
+.stat:hover{border-color:var(--border-hi)}
+.stat-lbl{font-size:11px;color:var(--text3);letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px}
+.stat-val{font-size:24px;font-weight:800}
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.3px}
+.bg{background:rgba(0,214,143,.12);color:var(--neon);border:0.5px solid rgba(0,214,143,.3)}
+.br{background:rgba(255,77,109,.12);color:#ff6b87;border:0.5px solid rgba(255,77,109,.3)}
+.ba{background:rgba(245,166,35,.12);color:#f5a623;border:0.5px solid rgba(245,166,35,.3)}
+.bb{background:rgba(56,189,248,.12);color:#38bdf8;border:0.5px solid rgba(56,189,248,.3)}
+.bgr{background:rgba(100,100,100,.1);color:var(--text2);border:0.5px solid var(--border)}
+.sec{font-size:12px;font-weight:500;color:var(--text2);letter-spacing:.8px;text-transform:uppercase;margin-bottom:12px}
+.divider{border:none;border-top:0.5px solid var(--border);margin:12px 0}
+.rider-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid rgba(0,214,143,.06)}
+.rider-row:last-child{border-bottom:none}
+.av{width:34px;height:34px;border-radius:50%;background:rgba(0,214,143,.1);border:0.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--neon);flex-shrink:0}
+.zone-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid rgba(0,214,143,.06)}
+.zone-row:last-child{border-bottom:none}
+.zone-lbl{font-size:12px;min-width:110px;color:var(--text2)}
+.bar-wrap{flex:1;height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden}
+.bar{height:5px;border-radius:3px;transition:width .6s}
+.elog{max-height:140px;overflow-y:auto;font-size:11px;font-family:monospace;background:rgba(0,0,0,.3);border:0.5px solid var(--border);border-radius:8px;padding:10px;line-height:2}
+.elog-line{display:flex;gap:8px}
+.elog-t{color:var(--neon);flex-shrink:0;font-weight:700}
+.elog-m{color:var(--text2)}
+.trig-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px}
+.tb{padding:12px 6px;border:0.5px solid var(--border);border-radius:9px;background:rgba(13,21,16,.6);cursor:pointer;text-align:center;transition:all .2s;font-family:inherit}
+.tb:hover{border-color:var(--border-hi);background:var(--neon-dim)}
+.tb.sel{border-color:var(--neon);background:var(--neon-dim);box-shadow:0 0 12px rgba(0,214,143,.15)}
+.tb-icon{font-size:20px;display:block;margin-bottom:5px}
+.tb-lbl{font-size:10px;color:var(--text2);font-weight:600;letter-spacing:.4px;text-transform:uppercase}
+.trig-desc{margin-bottom:14px;padding:11px 14px;background:rgba(0,0,0,.25);border-left:2px solid var(--neon);border-radius:0 8px 8px 0;font-size:12px;color:var(--text2);line-height:1.5}
+.pipeline{display:flex;align-items:stretch;border:0.5px solid var(--border);border-radius:10px;overflow:hidden;margin:14px 0}
+.ps{flex:1;padding:14px 6px;text-align:center;background:rgba(8,14,10,.7);border-right:0.5px solid var(--border);transition:all .4s}
+.ps:last-child{border-right:none}
+.ps.active{background:rgba(245,166,35,.08);border-color:rgba(245,166,35,.3)}
+.ps.done{background:rgba(0,214,143,.08);border-color:rgba(0,214,143,.25)}
+.ps-num{width:22px;height:22px;border-radius:50%;background:var(--text3);color:var(--bg);font-size:10px;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;font-weight:800;transition:all .4s}
+.ps.done .ps-num{background:var(--neon);box-shadow:0 0 10px rgba(0,214,143,.5)}
+.ps.active .ps-num{background:var(--amber);box-shadow:0 0 10px rgba(245,166,35,.4)}
+.ps-lbl{font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.4px;text-transform:uppercase;transition:color .4s}
+.ps.done .ps-lbl{color:var(--neon)}
+.ps.active .ps-lbl{color:var(--amber)}
+.ps-sub{font-size:9px;color:var(--text3);margin-top:2px}
+.pout-box{display:none;padding:20px;background:linear-gradient(135deg,rgba(0,214,143,.15) 0%,rgba(0,168,112,.05) 100%);border:0.5px solid rgba(0,214,143,.4);border-radius:10px;text-align:center;box-shadow:0 0 24px rgba(0,214,143,.12)}
+.pout-box.show{display:block}
+.pout-lbl{font-size:11px;color:var(--neon);font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px}
+.pout-amt{font-size:44px;font-weight:800;color:var(--neon);text-shadow:0 0 20px rgba(0,214,143,.4),0 0 40px rgba(0,214,143,.15)}
+.pout-sub{font-size:12px;color:var(--text2);margin-top:6px}
+.pout-meta{font-size:10px;color:var(--text3);margin-top:8px;font-family:monospace}
+.fire-btn{width:100%;padding:13px;background:var(--neon);border:none;border-radius:9px;color:#050806;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:.5px;transition:all .2s;text-transform:uppercase}
+.fire-btn:hover{transform:translateY(-2px);filter:brightness(1.15);box-shadow:0 6px 20px rgba(0,214,143,.35)}
+.fire-btn:disabled{background:var(--text3);cursor:not-allowed;transform:none;filter:none;box-shadow:none}
+.sl-row{margin-bottom:14px}
+.sl-lbl{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;color:var(--text2)}
+.sl-val{font-weight:700;color:var(--text)}
+.prem-big{font-size:52px;font-weight:800;color:var(--neon);text-align:center;margin:10px 0;text-shadow:0 0 20px rgba(0,214,143,.35),0 0 50px rgba(0,214,143,.1)}
+.prem-row{display:flex;justify-content:space-between;font-size:12px;padding:6px 0;border-bottom:0.5px solid rgba(0,214,143,.07);color:var(--text2)}
+.prem-row:last-child{border-bottom:none}
+.prem-row span:last-child{font-weight:700;color:var(--text)}
+.how-step{display:flex;gap:14px;margin-bottom:16px;align-items:flex-start}
+.how-num{width:28px;height:28px;border-radius:50%;background:var(--neon-dim);border:0.5px solid var(--border-hi);color:var(--neon);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.how-ttl{font-size:13px;font-weight:700;margin-bottom:4px;color:var(--text)}
+.how-desc{font-size:12px;color:var(--text2);line-height:1.6}
+.compare{border-radius:10px;padding:14px}
+.cmp-bad{background:rgba(255,77,109,.06);border:0.5px solid rgba(255,77,109,.2)}
+.cmp-good{background:rgba(0,214,143,.06);border:0.5px solid rgba(0,214,143,.2)}
+.cmp-ttl{font-size:12px;font-weight:700;margin-bottom:10px;letter-spacing:.3px}
+.cmp-bad .cmp-ttl{color:#ff6b87}
+.cmp-good .cmp-ttl{color:var(--neon)}
+.cmp-item{font-size:11px;padding:3px 0;display:flex;gap:6px;color:var(--text2);line-height:1.5}
+.fraud-wrap{display:flex;align-items:center;justify-content:center;margin:12px 0}
+.check-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:0.5px solid rgba(0,214,143,.06);font-size:12px}
+.check-row:last-child{border-bottom:none}
+.check-lbl{color:var(--text2)}
+.live-tag{display:inline-flex;align-items:center;gap:5px;font-size:10px;color:var(--red);font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+.live-d{width:6px;height:6px;border-radius:50%;background:var(--red);animation:pulseAnim 1s infinite}
+.formula-box{background:rgba(0,0,0,.35);border:0.5px solid var(--border);border-radius:8px;padding:14px;margin-top:14px;font-size:12px;color:var(--text2);line-height:1.7;box-shadow:inset 0 0 15px rgba(0,0,0,.5)}
+.mono{font-family:monospace;color:var(--neon)}
+</style>
+
+<div class="dot-bg"></div>
+<div class="app">
+
+<div class="hdr">
+  <div class="logo">
+    <div class="logo-sq">Q</div>
+    <div>
+      <div>QCover <span style="color:var(--text3);font-weight:400;font-size:13px">/ Parametric Insurance</span></div>
+      <div class="logo-sub">Quick Commerce Riders · Zepto / Blinkit</div>
+    </div>
+  </div>
+  <div class="sys-status">
+    <span class="pulse-dot"></span>
+    SYSTEM OPERATIONAL &nbsp;·&nbsp; 5 zones monitored &nbsp;·&nbsp; Phase 1 prototype
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn active" onclick="switchTab('dash',this)">Dashboard</button>
+  <button class="nav-btn" onclick="switchTab('sim',this)">Simulate trigger</button>
+  <button class="nav-btn" onclick="switchTab('how',this)">How it works</button>
+  <button class="nav-btn" onclick="switchTab('prem',this)">Premium calc</button>
+  <button class="nav-btn" onclick="switchTab('fraud',this)">Fraud engine</button>
+</div>
+
+<!-- DASHBOARD -->
+<div class="page active" id="page-dash">
+  <div class="g4">
+    <div class="stat"><div class="stat-lbl">Covered riders</div><div class="stat-val" style="color:var(--neon)">4</div></div>
+    <div class="stat"><div class="stat-lbl">Active triggers</div><div class="stat-val" id="d-trigs" style="color:var(--amber)">0</div></div>
+    <div class="stat"><div class="stat-lbl">Payouts today</div><div class="stat-val" id="d-pay" style="color:var(--neon)">₹0</div></div>
+    <div class="stat"><div class="stat-lbl">Avg weekly premium</div><div class="stat-val" style="color:var(--blue)">₹84</div></div>
+  </div>
+  <div class="g2">
+    <div class="card-ui">
+      <div class="sec">Active riders</div>
+      <div class="rider-row"><div style="display:flex;align-items:center;gap:10px"><div class="av">RK</div><div><div style="font-size:13px;font-weight:600">Ravi Kumar</div><div style="font-size:10px;color:var(--text3)">Blinkit · Andheri, Mumbai</div></div></div><span class="badge bg">Covered</span></div>
+      <div class="rider-row"><div style="display:flex;align-items:center;gap:10px"><div class="av">PS</div><div><div style="font-size:13px;font-weight:600">Priya Sharma</div><div style="font-size:10px;color:var(--text3)">Zepto · Rohini, Delhi</div></div></div><span class="badge bg">Covered</span></div>
+      <div class="rider-row"><div style="display:flex;align-items:center;gap:10px"><div class="av">MN</div><div><div style="font-size:13px;font-weight:600">Meera Nair</div><div style="font-size:10px;color:var(--text3)">Blinkit · Koramangala, BLR</div></div></div><span class="badge bg">Covered</span></div>
+      <div class="rider-row"><div style="display:flex;align-items:center;gap:10px"><div class="av">AR</div><div><div style="font-size:13px;font-weight:600">Arjun Reddy</div><div style="font-size:10px;color:var(--text3)">Zepto · Madhapur, Hyd</div></div></div><span class="badge bg">Covered</span></div>
+      <div class="rider-row"><div style="display:flex;align-items:center;gap:10px"><div class="av" style="color:var(--text3);background:rgba(100,100,100,.1)">PJ</div><div><div style="font-size:13px;font-weight:600">Pankaj Joshi</div><div style="font-size:10px;color:var(--text3)">Zepto · Baner, Pune</div></div></div><span class="badge bgr">Inactive</span></div>
+    </div>
+    <div class="card-ui">
+      <div class="sec">Zone risk monitor</div>
+      <div class="zone-row"><span class="zone-lbl">Mumbai (Andheri)</span><div class="bar-wrap"><div class="bar" style="width:70%;background:#E24B4A;box-shadow:0 0 6px rgba(226,75,74,.5)"></div></div><span class="badge br" style="font-size:10px">High</span></div>
+      <div class="zone-row"><span class="zone-lbl">Delhi (Rohini)</span><div class="bar-wrap"><div class="bar" style="width:90%;background:#E24B4A;animation:barPulse 2s infinite;box-shadow:0 0 8px rgba(226,75,74,.6)"></div></div><span class="badge br" style="font-size:10px">Extreme</span></div>
+      <div class="zone-row"><span class="zone-lbl">Bengaluru (KRM)</span><div class="bar-wrap"><div class="bar" style="width:45%;background:#BA7517;box-shadow:0 0 6px rgba(186,117,23,.4)"></div></div><span class="badge ba" style="font-size:10px">Medium</span></div>
+      <div class="zone-row"><span class="zone-lbl">Hyderabad (MPR)</span><div class="bar-wrap"><div class="bar" style="width:40%;background:#BA7517;box-shadow:0 0 5px rgba(186,117,23,.3)"></div></div><span class="badge ba" style="font-size:10px">Medium</span></div>
+      <div class="zone-row"><span class="zone-lbl">Pune (Baner)</span><div class="bar-wrap"><div class="bar" style="width:18%;background:#1D9E75;box-shadow:0 0 5px rgba(29,158,117,.3)"></div></div><span class="badge bg" style="font-size:10px">Low</span></div>
+      <hr class="divider">
+      <div class="sec">Event log <span class="live-tag"><span class="live-d"></span>live</span></div>
+      <div class="elog" id="elog">
+        <div class="elog-line"><span class="elog-t">08:42</span><span class="elog-m">System started. 5 zones monitored.</span></div>
+        <div class="elog-line"><span class="elog-t">09:00</span><span class="elog-m">Weather API poll: all clear.</span></div>
+        <div class="elog-line"><span class="elog-t">09:05</span><span class="elog-m">AQI Delhi: 389 — below threshold (400).</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SIMULATE -->
+<div class="page" id="page-sim">
+  <div class="g2">
+    <div class="card-ui">
+      <div class="sec">Select disruption event</div>
+      <div class="trig-grid">
+        <div class="tb sel" id="tb-rain" onclick="selTrig('rain',this)"><span class="tb-icon">🌧</span><span class="tb-lbl">Rainfall</span></div>
+        <div class="tb" id="tb-aqi"     onclick="selTrig('aqi',this)"><span class="tb-icon">🏭</span><span class="tb-lbl">AQI</span></div>
+        <div class="tb" id="tb-heat"    onclick="selTrig('heat',this)"><span class="tb-icon">🌡</span><span class="tb-lbl">Heat</span></div>
+        <div class="tb" id="tb-traffic" onclick="selTrig('traffic',this)"><span class="tb-icon">🚦</span><span class="tb-lbl">Traffic</span></div>
+        <div class="tb" id="tb-civic"   onclick="selTrig('civic',this)"><span class="tb-icon">🚫</span><span class="tb-lbl">Curfew</span></div>
+      </div>
+
+      <div class="trig-desc" id="tdesc"></div>
+
+      <div class="sl-row">
+        <div class="sl-lbl">
+          <span id="sv-lbl-name">Rainfall intensity</span>
+          <span class="sl-val"><span id="sv-lbl-val">65</span> <span id="sv-lbl-unit">mm/hr</span></span>
+        </div>
+        <input type="range" id="sv-sl" min="0" max="100" value="65" step="1" oninput="updSlider(this.value)">
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-top:4px">
+          <span id="sv-min-lbl">0</span>
+          <span id="sv-thresh-lbl" style="color:var(--red);font-weight:600">▲ threshold: 50 mm/hr</span>
+          <span id="sv-max-lbl">100</span>
+        </div>
+      </div>
+
+      <div class="sl-row">
+        <div style="font-size:12px;color:var(--text2);font-weight:500;margin-bottom:6px;letter-spacing:.3px">Affected zone</div>
+        <select id="zone-sel">
+          <option>Mumbai — Andheri West (ZONE_MUM_01)</option>
+          <option>Delhi — Rohini (ZONE_DEL_01)</option>
+          <option>Bengaluru — Koramangala (ZONE_BLR_01)</option>
+        </select>
+      </div>
+      <button class="fire-btn" id="fire-btn" onclick="fireSim()">Fire trigger</button>
+    </div>
+
+    <div class="card-ui">
+      <div class="sec">Zero-touch payout pipeline</div>
+      <div class="pipeline">
+        <div class="ps" id="ps1"><div class="ps-num">1</div><div class="ps-lbl">Detect</div><div class="ps-sub">API poll</div></div>
+        <div class="ps" id="ps2"><div class="ps-num">2</div><div class="ps-lbl">Evaluate</div><div class="ps-sub">Threshold</div></div>
+        <div class="ps" id="ps3"><div class="ps-num">3</div><div class="ps-lbl">Validate</div><div class="ps-sub">GPS+Fraud</div></div>
+        <div class="ps" id="ps4"><div class="ps-num">4</div><div class="ps-lbl">Claim</div><div class="ps-sub">Auto-init</div></div>
+        <div class="ps" id="ps5"><div class="ps-num">5</div><div class="ps-lbl">Payout</div><div class="ps-sub">UPI mock</div></div>
+      </div>
+      <div id="pipe-status" style="font-size:11px;color:var(--text3);text-align:center;min-height:18px;margin-bottom:12px;letter-spacing:.3px">Fire a trigger to start the pipeline</div>
+
+      <div class="pout-box" id="pout-box">
+        <div class="pout-lbl">Payout processed — zero rider action required</div>
+        <div class="pout-amt" id="pout-amt">₹180</div>
+        <div class="pout-sub">Sent to Ravi Kumar &nbsp;·&nbsp; UPI mock &nbsp;·&nbsp; Blinkit Andheri</div>
+        <div class="pout-meta">Claim ID: QC-<span id="claim-id">1042</span> &nbsp;·&nbsp; Fraud score: 0.04 &nbsp;·&nbsp; AUTO-APPROVED</div>
+      </div>
+
+      <div style="margin-top:14px">
+        <div class="sec">Simulation log</div>
+        <div class="elog" id="sim-elog" style="min-height:80px">
+          <div class="elog-line"><span class="elog-t">--:--:--</span><span class="elog-m">Awaiting trigger...</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<div class="page" id="page-how">
+  <div class="g2">
+    <div class="card-ui">
+      <div class="sec">The problem vs the solution</div>
+      <div class="compare cmp-bad" style="margin-bottom:12px">
+        <div class="cmp-ttl">Without QCover — a Blinkit rider in rain</div>
+        <div class="cmp-item"><span>•</span>65mm/hr rain hits the zone at 10 AM</div>
+        <div class="cmp-item"><span>•</span>Rider cannot complete orders safely</div>
+        <div class="cmp-item"><span>•</span>Sits idle for 2 hours at dark store</div>
+        <div class="cmp-item"><span>•</span>Loses ₹180 in earnings (₹90/hr)</div>
+        <div class="cmp-item"><span>•</span>No platform support. No safety net.</div>
+        <div class="cmp-item" style="margin-top:6px"><strong style="color:#ff6b87">Rider bears 100% of the loss.</strong></div>
+      </div>
+      <div class="compare cmp-good">
+        <div class="cmp-ttl">With QCover — same event</div>
+        <div class="cmp-item"><span style="color:var(--neon)">✓</span>65mm/hr detected at 9:45 AM by sensor</div>
+        <div class="cmp-item"><span style="color:var(--neon)">✓</span>Threshold 50mm crossed → trigger fires</div>
+        <div class="cmp-item"><span style="color:var(--neon)">✓</span>GPS validates rider is on shift in zone</div>
+        <div class="cmp-item"><span style="color:var(--neon)">✓</span>Claim auto-created in under 5 seconds</div>
+        <div class="cmp-item"><span style="color:var(--neon)">✓</span>₹180 sent to UPI by 9:50 AM</div>
+        <div class="cmp-item" style="margin-top:6px"><strong style="color:var(--neon)">Rider action required: zero.</strong></div>
+      </div>
+    </div>
+    <div class="card-ui">
+      <div class="sec">System walkthrough — 5 steps</div>
+      <div class="how-step"><div class="how-num">1</div><div><div class="how-ttl">Sensor polls every 5 minutes</div><div class="how-desc">OpenWeatherMap, CPCB AQI, HERE Traffic, and Govt Alert APIs queried for every registered dark-store delivery zone.</div></div></div>
+      <div class="how-step"><div class="how-num">2</div><div><div class="how-ttl">Threshold evaluation</div><div class="how-desc">Rainfall &gt; 50mm/hr, AQI &gt; 400, Heat &gt; 45°C, Zone speed &lt; 5km/hr — any breach emits a DisruptionEvent for that zone.</div></div></div>
+      <div class="how-step"><div class="how-num">3</div><div><div class="how-ttl">Fraud validation (AI)</div><div class="how-desc">GPS zone check, duplicate event guard, spoofing detection (impossible speed &gt; 120km/hr). Score 0–1, auto-approve if &lt; 0.2.</div></div></div>
+      <div class="how-step"><div class="how-num">4</div><div><div class="how-ttl">Claim auto-initiated</div><div class="how-desc">Payout = disrupted hours × hourly rate × payout%. Zero manual filing. Zero app interaction from the rider.</div></div></div>
+      <div class="how-step"><div class="how-num" style="background:rgba(0,214,143,.15);border-color:var(--border-hi);box-shadow:0 0 8px rgba(0,214,143,.2)">5</div><div><div class="how-ttl">Instant payout</div><div class="how-desc">Mock UPI transfer fired. Rider push notification sent. Detection to payout: under 30 seconds. No paperwork. Ever.</div></div></div>
+    </div>
+  </div>
+  <div class="card-ui" style="margin-top:0">
+    <div class="sec">Five parametric triggers</div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px">
+      <div style="text-align:center;padding:14px 8px;background:rgba(0,0,0,.25);border:0.5px solid var(--border);border-radius:9px;transition:border-color .2s" onmouseover="this.style.borderColor='var(--border-hi)'" onmouseout="this.style.borderColor='var(--border)'"><div style="font-size:22px;margin-bottom:6px">🌧</div><div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:4px">Rainfall</div><div style="font-size:10px;color:var(--text3)">&gt; 50 mm/hr</div><div style="font-size:10px;color:var(--neon);margin-top:5px;font-weight:700">100% payout</div></div>
+      <div style="text-align:center;padding:14px 8px;background:rgba(0,0,0,.25);border:0.5px solid var(--border);border-radius:9px;transition:border-color .2s" onmouseover="this.style.borderColor='var(--border-hi)'" onmouseout="this.style.borderColor='var(--border)'"><div style="font-size:22px;margin-bottom:6px">🏭</div><div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:4px">AQI</div><div style="font-size:10px;color:var(--text3)">&gt; 400 AQI</div><div style="font-size:10px;color:var(--neon);margin-top:5px;font-weight:700">100% payout</div></div>
+      <div style="text-align:center;padding:14px 8px;background:rgba(0,0,0,.25);border:0.5px solid var(--border);border-radius:9px;transition:border-color .2s" onmouseover="this.style.borderColor='var(--border-hi)'" onmouseout="this.style.borderColor='var(--border)'"><div style="font-size:22px;margin-bottom:6px">🌡</div><div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:4px">Heat</div><div style="font-size:10px;color:var(--text3)">&gt; 45°C</div><div style="font-size:10px;color:var(--neon);margin-top:5px;font-weight:700">100% payout</div></div>
+      <div style="text-align:center;padding:14px 8px;background:rgba(0,0,0,.25);border:0.5px solid var(--border);border-radius:9px;transition:border-color .2s" onmouseover="this.style.borderColor='var(--border-hi)'" onmouseout="this.style.borderColor='var(--border)'"><div style="font-size:22px;margin-bottom:6px">🚦</div><div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:4px">Traffic</div><div style="font-size:10px;color:var(--text3)">&lt; 5 km/hr</div><div style="font-size:10px;color:var(--amber);margin-top:5px;font-weight:700">75% payout</div></div>
+      <div style="text-align:center;padding:14px 8px;background:rgba(0,0,0,.25);border:0.5px solid var(--border);border-radius:9px;transition:border-color .2s" onmouseover="this.style.borderColor='var(--border-hi)'" onmouseout="this.style.borderColor='var(--border)'"><div style="font-size:22px;margin-bottom:6px">🚫</div><div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:4px">Curfew</div><div style="font-size:10px;color:var(--text3)">Confirmed</div><div style="font-size:10px;color:var(--neon);margin-top:5px;font-weight:700">100% payout</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- PREMIUM CALC -->
+<div class="page" id="page-prem">
+  <div class="g2">
+    <div class="card-ui">
+      <div class="sec">Premium inputs</div>
+      <div class="sl-row">
+        <div class="sl-lbl"><span>Daily avg earnings</span><span class="sl-val" id="p-earn-lbl">₹750</span></div>
+        <input type="range" min="300" max="1200" value="750" step="10" id="p-earn" oninput="calcPrem()">
+      </div>
+      <div class="sl-row">
+        <div class="sl-lbl"><span>Claims in last 6 months</span><span class="sl-val" id="p-claims-lbl">1</span></div>
+        <input type="range" min="0" max="8" value="1" step="1" id="p-claims" oninput="calcPrem()">
+      </div>
+      <div class="sl-row">
+        <div style="font-size:12px;color:var(--text2);margin-bottom:6px;font-weight:500;letter-spacing:.3px">Zone risk tier</div>
+        <select id="p-zone" onchange="calcPrem()">
+          <option value="0.8">Low risk zone (×0.8)</option>
+          <option value="1.0" selected>Medium risk zone (×1.0)</option>
+          <option value="1.4">High risk zone (×1.4)</option>
+          <option value="1.8">Extreme risk zone (×1.8)</option>
+        </select>
+      </div>
+      <div class="sl-row">
+        <div style="font-size:12px;color:var(--text2);margin-bottom:6px;font-weight:500;letter-spacing:.3px">Season</div>
+        <select id="p-season" onchange="calcPrem()">
+          <option value="1.5">Monsoon — Jun–Sep (×1.5)</option>
+          <option value="1.3" selected>Winter AQI — Oct–Feb (×1.3)</option>
+          <option value="1.2">Summer — Mar–May (×1.2)</option>
+        </select>
+      </div>
+    </div>
+    <div class="card-ui" style="display:flex;flex-direction:column;justify-content:space-between">
+      <div>
+        <div class="sec">Weekly premium rate</div>
+        <div class="prem-big" id="p-out">₹81</div>
+        <div style="text-align:center;font-size:11px;color:var(--text3);margin-bottom:16px">Max weekly payout: <span id="p-maxpay" style="color:var(--neon);font-weight:700">₹1,350</span></div>
+        <div style="background:rgba(0,0,0,.2);border-radius:10px;padding:14px">
+          <div class="prem-row"><span>Base rate</span><span id="p-base">₹54.00</span></div>
+          <div class="prem-row"><span>Zone risk multiplier</span><span id="p-zrm">×1.0</span></div>
+          <div class="prem-row"><span>Seasonal factor</span><span id="p-sf">×1.3</span></div>
+          <div class="prem-row"><span>Rider history factor</span><span id="p-rhm">×1.10</span></div>
+          <div class="prem-row" style="border-top:0.5px solid var(--border-hi);margin-top:6px;padding-top:8px"><span style="font-weight:700;color:var(--text)">Weekly premium</span><span id="p-final" style="font-weight:800;color:var(--neon)">₹81</span></div>
+        </div>
+      </div>
+      <div class="formula-box">
+        <div style="color:var(--text2);font-weight:600;margin-bottom:4px;font-size:11px;letter-spacing:.5px;text-transform:uppercase">Formula</div>
+        <span class="mono">Premium = Base × ZRM × SF × RHM</span><br>
+        <span class="mono">Base = Earn × 6d × 30% × 4%</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FRAUD ENGINE -->
+<div class="page" id="page-fraud">
+  <div class="g2">
+    <div class="card-ui">
+      <div class="sec">Fraud signal inputs</div>
+      <div class="sl-row">
+        <div class="sl-lbl"><span>GPS distance from zone (km)</span><span class="sl-val" id="f-gps-lbl">0.8 km</span></div>
+        <input type="range" min="0" max="10" value="0.8" step="0.1" id="f-gps" oninput="calcFraud()">
+        <div style="font-size:10px;color:var(--text3);margin-top:3px">Zone boundary: 3 km radius — drag past 3 to fail</div>
+      </div>
+      <div class="sl-row">
+        <div class="sl-lbl"><span>Claims in last 30 days</span><span class="sl-val" id="f-freq-lbl">2</span></div>
+        <input type="range" min="0" max="15" value="2" step="1" id="f-freq" oninput="calcFraud()">
+      </div>
+      <div class="sl-row">
+        <div style="font-size:12px;color:var(--text2);margin-bottom:6px;font-weight:500;letter-spacing:.3px">Duplicate claim for this event?</div>
+        <select id="f-dup" onchange="calcFraud()">
+          <option value="0">No — first claim for this event</option>
+          <option value="1">Yes — already claimed this event</option>
+        </select>
+      </div>
+      <div class="sl-row">
+        <div style="font-size:12px;color:var(--text2);margin-bottom:6px;font-weight:500;letter-spacing:.3px">GPS speed anomaly?</div>
+        <select id="f-spd" onchange="calcFraud()">
+          <option value="0">Normal — speed plausible</option>
+          <option value="1">Anomaly — impossible speed detected</option>
+        </select>
+      </div>
+    </div>
+    <div class="card-ui">
+      <div class="sec">Fraud score output</div>
+      <div class="fraud-wrap">
+        <svg width="160" height="160" viewBox="0 0 160 160" style="filter:drop-shadow(0 0 8px rgba(0,214,143,.3))">
+          <circle cx="80" cy="80" r="64" fill="none" stroke="rgba(0,214,143,0.1)" stroke-width="14"/>
+          <circle cx="80" cy="80" r="64" fill="none" stroke="#00d68f" stroke-width="14"
+            stroke-linecap="round" stroke-dasharray="402" stroke-dashoffset="386"
+            transform="rotate(-90 80 80)" id="fraud-arc" style="transition:all .6s"/>
+          <text x="80" y="76" text-anchor="middle" fill="#00d68f" font-size="38" font-weight="800" font-family="system-ui" id="fraud-score-num">0.04</text>
+          <text x="80" y="96" text-anchor="middle" fill="#3d6b50" font-size="11" font-family="system-ui" letter-spacing="1" id="fraud-decision-txt">AUTO-APPROVED</text>
+        </svg>
+      </div>
+      <hr class="divider">
+      <div class="sec">Signal breakdown</div>
+      <div class="check-row"><span class="check-lbl">GPS in zone (radius 3 km)</span><span class="badge bg" id="fc-gps">PASS</span></div>
+      <div class="check-row"><span class="check-lbl">Duplicate claim guard</span><span class="badge bg" id="fc-dup">PASS</span></div>
+      <div class="check-row"><span class="check-lbl">Speed anomaly / spoofing</span><span class="badge bg" id="fc-spd">PASS</span></div>
+      <div class="check-row"><span class="check-lbl">Claim frequency (30d)</span><span class="badge bg" id="fc-freq">PASS</span></div>
+      <div class="check-row" style="border-top:0.5px solid var(--border-hi);margin-top:6px;padding-top:10px">
+        <span class="check-lbl" style="font-weight:700;color:var(--text)">Final decision</span>
+        <span class="badge bg" id="fc-decision">AUTO-APPROVED</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+var S={trigs:0,totalPay:0,claimN:1040,simRunning:false};
+
+/* ── Trigger metadata ── each field drives all labels automatically ── */
+var TM={
+  rain:{
+    name:'Rainfall intensity', unit:'mm/hr',
+    thresh:50, threshDir:'above', max:100, min:0, defaultVal:65,
+    pct:1.0, inv:false,
+    desc:'<span style="color:var(--text);font-weight:700">Rainfall</span> — trigger fires above <span style="color:var(--red);font-weight:700">50 mm/hr</span>. Payout: 100% of hourly rate.'
+  },
+  aqi:{
+    name:'AQI index', unit:'AQI',
+    thresh:400, threshDir:'above', max:600, min:0, defaultVal:420,
+    pct:1.0, inv:false,
+    desc:'<span style="color:var(--text);font-weight:700">AQI</span> — trigger fires above <span style="color:var(--red);font-weight:700">400 AQI</span>. Payout: 100% of hourly rate.'
+  },
+  heat:{
+    name:'Temperature', unit:'°C',
+    thresh:45, threshDir:'above', max:55, min:30, defaultVal:46,
+    pct:1.0, inv:false,
+    desc:'<span style="color:var(--text);font-weight:700">Heat</span> — trigger fires above <span style="color:var(--red);font-weight:700">45°C</span>. Payout: 100% of hourly rate.'
+  },
+  traffic:{
+    name:'Avg zone speed', unit:'km/hr',
+    thresh:5, threshDir:'below', max:40, min:0, defaultVal:3,
+    pct:0.75, inv:true,
+    desc:'<span style="color:var(--text);font-weight:700">Traffic</span> — trigger fires <span style="color:var(--red);font-weight:700">below 5 km/hr</span>. Payout: 75% of hourly rate.'
+  },
+  civic:{
+    name:'Curfew / civic flag', unit:'(1=active)',
+    thresh:1, threshDir:'at', max:1, min:0, defaultVal:1,
+    pct:1.0, inv:false,
+    desc:'<span style="color:var(--text);font-weight:700">Civic disruption</span> — trigger fires when <span style="color:var(--red);font-weight:700">curfew confirmed (flag = 1)</span>. Payout: 100%.'
+  }
+};
+
+var curTrig='rain';
+
+/* ── Initialise slider UI from metadata ── */
+function applyTriggerUI(t){
+  var m=TM[t];
+  var sl=document.getElementById('sv-sl');
+  sl.min=m.min; sl.max=m.max; sl.step=(m.max-m.min>10)?1:0.1; sl.value=m.defaultVal;
+
+  document.getElementById('sv-lbl-name').textContent=m.name;
+  document.getElementById('sv-lbl-unit').textContent=m.unit;
+  document.getElementById('sv-lbl-val').textContent=parseFloat(m.defaultVal).toFixed(m.max<=1?1:0);
+
+  document.getElementById('sv-min-lbl').textContent=m.min;
+  document.getElementById('sv-max-lbl').textContent=m.max;
+
+  var threshLabel='▲ threshold: '+m.threshDir+' '+m.thresh+' '+m.unit;
+  document.getElementById('sv-thresh-lbl').textContent=threshLabel;
+
+  document.getElementById('tdesc').innerHTML=m.desc;
+}
+
+function selTrig(t,el){
+  curTrig=t;
+  document.querySelectorAll('.tb').forEach(function(b){b.classList.remove('sel')});
+  el.classList.add('sel');
+  applyTriggerUI(t);
+  resetPipe();
+}
+
+function updSlider(v){
+  var m=TM[curTrig];
+  var decimals=m.max<=1?1:0;
+  document.getElementById('sv-lbl-val').textContent=parseFloat(v).toFixed(decimals);
+}
+
+function switchTab(id,btn){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active')});
+  document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active')});
+  document.getElementById('page-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function resetPipe(){
+  for(var i=1;i<=5;i++){document.getElementById('ps'+i).className='ps'}
+  document.getElementById('pout-box').classList.remove('show');
+  document.getElementById('pipe-status').textContent='Fire a trigger to start the pipeline';
+  document.getElementById('fire-btn').disabled=false;
+  document.getElementById('fire-btn').textContent='Fire trigger';
+  S.simRunning=false;
+}
+
+function addLog(boxId,msg){
+  var box=document.getElementById(boxId);
+  var d=new Date(),h=d.getHours().toString().padStart(2,'0'),mn=d.getMinutes().toString().padStart(2,'0'),s=d.getSeconds().toString().padStart(2,'0');
+  var ln=document.createElement('div');ln.className='elog-line';
+  ln.innerHTML='<span class="elog-t">'+h+':'+mn+':'+s+'</span><span class="elog-m">'+msg+'</span>';
+  box.appendChild(ln);box.scrollTop=box.scrollHeight;
+}
+
+function fireSim(){
+  if(S.simRunning)return;
+  var m=TM[curTrig];
+  var v=parseFloat(document.getElementById('sv-sl').value);
+  var crosses=m.inv?(v<=m.thresh):(v>=m.thresh);
+  if(!crosses){
+    var dir=m.inv?'below or equal to':'above or equal to';
+    document.getElementById('pipe-status').textContent='Value '+v+' '+m.unit+' does not cross threshold. Need '+dir+' '+m.thresh+'.';
+    return;
+  }
+  S.simRunning=true;
+  var zoneEl=document.getElementById('zone-sel');
+  var zone=zoneEl.options[zoneEl.selectedIndex].text.split('—')[0].trim();
+  document.getElementById('fire-btn').disabled=true;
+  document.getElementById('fire-btn').textContent='Processing...';
+  document.getElementById('pout-box').classList.remove('show');
+  document.getElementById('sim-elog').innerHTML='';
+
+  var payout=Math.round(90*2*m.pct);
+  S.claimN++;
+
+  var steps=[
+    {id:'ps1',log:'SENSOR: '+m.name+' = '+v+' '+m.unit+' detected in '+zone,                          status:'Detecting '+m.name.toLowerCase()+' in '+zone+'...'},
+    {id:'ps2',log:'EVALUATE: '+v+' '+m.unit+(m.inv?' is below ':' exceeds ')+m.thresh+' — TRIGGER FIRED',status:'Threshold crossed — trigger fired'},
+    {id:'ps3',log:'FRAUD: GPS in zone ✓  Duplicate ✗  Speed normal ✓  Score: 0.04 — PASS',             status:'Fraud validation passed (score 0.04)'},
+    {id:'ps4',log:'CLAIM: ID QC-'+S.claimN+' created. Payout: '+Math.round(m.pct*100)+'% × ₹90/hr × 2hrs = ₹'+payout, status:'Claim QC-'+S.claimN+' auto-initiated — no rider action needed'},
+    {id:'ps5',log:'PAYOUT: ₹'+payout+' sent via mock UPI to Ravi Kumar (Blinkit Andheri)',             status:'Payout of ₹'+payout+' processed in under 30 seconds'}
+  ];
+
+  var delay=0;
+  steps.forEach(function(step,i){
+    setTimeout(function(){
+      document.getElementById(step.id).className='ps active';
+      document.getElementById('pipe-status').textContent=step.status;
+      addLog('sim-elog',step.log);
+      setTimeout(function(){document.getElementById(step.id).className='ps done'},700);
+      if(i===steps.length-1){
+        setTimeout(function(){
+          document.getElementById('pout-amt').textContent='₹'+payout;
+          document.getElementById('claim-id').textContent=S.claimN;
+          document.getElementById('pout-box').classList.add('show');
+          S.totalPay+=payout; S.trigs++;
+          document.getElementById('d-pay').textContent='₹'+S.totalPay;
+          document.getElementById('d-trigs').textContent=S.trigs;
+          addLog('elog','TRIGGER: '+m.name+' in '+zone+' — ₹'+payout+' payout → RIDER_001 (QC-'+S.claimN+')');
+          S.simRunning=false;
+          document.getElementById('fire-btn').disabled=false;
+          document.getElementById('fire-btn').textContent='Fire again';
+        },900);
+      }
+    },delay);
+    delay+=950;
+  });
+}
+
+function calcPrem(){
+  var earn=parseFloat(document.getElementById('p-earn').value);
+  var claims=parseInt(document.getElementById('p-claims').value);
+  var zrm=parseFloat(document.getElementById('p-zone').value);
+  var sf=parseFloat(document.getElementById('p-season').value);
+  var rhm=claims===0?1.0:claims<=2?1.1:claims<=5?1.25:1.5;
+  var base=earn*6*0.30*0.04;
+  var prem=Math.round(base*zrm*sf*rhm);
+  var maxPay=Math.round(earn*6*0.30);
+  document.getElementById('p-earn-lbl').textContent='₹'+Math.round(earn);
+  document.getElementById('p-claims-lbl').textContent=claims;
+  document.getElementById('p-base').textContent='₹'+base.toFixed(2);
+  document.getElementById('p-zrm').textContent='×'+zrm;
+  document.getElementById('p-sf').textContent='×'+sf;
+  document.getElementById('p-rhm').textContent='×'+rhm.toFixed(2);
+  document.getElementById('p-out').textContent='₹'+prem;
+  document.getElementById('p-final').textContent='₹'+prem;
+  document.getElementById('p-maxpay').textContent='₹'+maxPay;
+}
+
+function calcFraud(){
+  var gps=parseFloat(document.getElementById('f-gps').value);
+  var freq=parseInt(document.getElementById('f-freq').value);
+  var dup=parseInt(document.getElementById('f-dup').value);
+  var spd=parseInt(document.getElementById('f-spd').value);
+  document.getElementById('f-gps-lbl').textContent=gps.toFixed(1)+' km';
+  document.getElementById('f-freq-lbl').textContent=freq;
+  var score=0;
+  var gpsOk=gps<=3.0, dupOk=dup===0, spdOk=spd===0, freqOk=freq<=7;
+  if(!gpsOk)score+=0.40;
+  if(!dupOk)score+=0.50;
+  if(!spdOk)score+=0.45;
+  if(freq>7)score+=0.20;
+  else if(freq>4)score+=0.08;
+  score=Math.min(score,1.0);
+  var dec=score<0.20?'AUTO-APPROVED':score<0.70?'MANUAL REVIEW':'AUTO-REJECTED';
+  var col=score<0.20?'#00d68f':score<0.70?'#f5a623':'#ff4d6d';
+  var arc=document.getElementById('fraud-arc');
+  arc.setAttribute('stroke',col);
+  arc.style.filter='drop-shadow(0 0 6px '+col+')';
+  arc.setAttribute('stroke-dashoffset',Math.round(402-(402*score)));
+  var num=document.getElementById('fraud-score-num');
+  num.textContent=score.toFixed(2);
+  num.setAttribute('fill',col);
+  document.getElementById('fraud-decision-txt').textContent=dec;
+  document.getElementById('fraud-decision-txt').setAttribute('fill',score<0.20?'#3d6b50':score<0.70?'#7a5b20':'#7a2030');
+  function setChk(id,pass,failTxt){
+    var el=document.getElementById(id);
+    el.textContent=pass?'PASS':failTxt;
+    el.className='badge '+(pass?'bg':'br');
+  }
+  setChk('fc-gps',gpsOk,'OUT OF ZONE');
+  setChk('fc-dup',dupOk,'DUPLICATE');
+  setChk('fc-spd',spdOk,'SPOOFING');
+  setChk('fc-freq',freqOk,'HIGH FREQ');
+  var fd=document.getElementById('fc-decision');
+  fd.textContent=dec;
+  fd.className='badge '+(score<0.20?'bg':score<0.70?'ba':'br');
+}
+
+/* ── Boot ── */
+applyTriggerUI('rain');
+calcPrem();
+calcFraud();
+</script>
