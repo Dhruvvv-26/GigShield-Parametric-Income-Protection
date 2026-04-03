@@ -1,0 +1,57 @@
+{
+  "expo": {
+    "name": "GigShield",
+    "slug": "gigshield-worker",
+    "version": "2.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "gigshield",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0A1628"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.gigshield.worker",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "GigShield needs your location to verify your zone for claim processing.",
+        "NSLocationAlwaysUsageDescription": "GigShield uses background location for claim verification.",
+        "NSMotionUsageDescription": "GigShield uses motion sensors for anti-fraud verification."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0A1628"
+      },
+      "package": "com.gigshield.worker",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "BODY_SENSORS"
+      ],
+      "googleServicesFile": "./google-services.json"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-location",
+      "expo-sensors",
+      "expo-secure-store",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#00C9B1"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "gigshield-worker"
+      }
+    }
+  }
+}

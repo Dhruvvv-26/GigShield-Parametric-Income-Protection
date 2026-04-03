@@ -1,0 +1,15 @@
+kafka:
+  brokers:
+    - redpanda:9092
+
+connect:
+  enabled: false
+
+server:
+  listenPort: 8080
+
+redpanda:
+  adminApi:
+    enabled: true
+    urls:
+      - http://redpanda:9644

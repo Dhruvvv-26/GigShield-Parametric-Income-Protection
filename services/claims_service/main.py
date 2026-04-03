@@ -1,0 +1,169 @@
+"""
+GigShield — Claims Service
+Responsibility:
+  - Consume trigger events from Redpanda (processed.trigger.events)
+  - Create claims for all active policies in affected zones
+  - Fraud score each claim using rule-based engine
+  - Route claims: auto_approved / soft_hold / blocked
+  - Expose REST API for claim queries and admin overrides
+Port: 8004
+"""
+import asyncio
+from contextlib import asynccontextmanager
+
+import uvicorn
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from prometheus_client import Counter, Gauge, make_asgi_app
+
+from shared.config import get_settings
+from shared.database import close_db, init_db
+from shared.logging_config import configure_logging, get_logger
+from shared.messaging import GigShieldProducer
+from shared.redis_client import close_redis, init_redis
+
+from consumers.trigger_consumer import TriggerEventConsumer
+from routes.claims import router as claims_router
+
+configure_logging()
+logger = get_logger(__name__)
+settings = get_settings()
+
+# ── Prometheus Metrics ────────────────────────────────────────────────────────
+
+CLAIMS_CREATED = Counter(
+    "claims_created_total",
+    "Total claims created",
+    ["status", "event_type"],
+)
+FRAUD_SCORES = Counter(
+    "fraud_decisions_total",
+    "Fraud scoring decisions",
+    ["decision"],
+)
+ACTIVE_CLAIMS = Gauge(
+    "active_claims_count",
+    "Current pending/processing claims",
+)
+
+# ── Global Producer ───────────────────────────────────────────────────────────
+producer = GigShieldProducer()
+consumer: TriggerEventConsumer | None = None
+consumer_task: asyncio.Task | None = None
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global consumer, consumer_task
+
+    logger.info("Claims Service starting up...")
+    await init_db()
+    await init_redis()
+    await producer.start()
+
+    # Start Redpanda consumer in background task
+    consumer = TriggerEventConsumer(producer=producer)
+    await consumer.start()
+    consumer_task = asyncio.create_task(consumer.consume())
+    logger.info("Trigger event consumer started ✓")
+
+    yield
+
+    # Shutdown
+    logger.info("Claims Service shutting down...")
+    if consumer:
+        await consumer.stop()
+    if consumer_task:
+        consumer_task.cancel()
+        try:
+            await consumer_task
+        except asyncio.CancelledError:
+            pass
+    await producer.stop()
+    await close_db()
+    await close_redis()
+    logger.info("Claims Service shutdown complete ✓")
+
+
+app = FastAPI(
+    title="GigShield Claims Service",
+    description="Parametric insurance claims: auto-creation, fraud scoring, payout routing",
+    version="2.0.0",
+    docs_url="/docs" if settings.env == "development" else None,
+    redoc_url="/redoc" if settings.env == "development" else None,
+    lifespan=lifespan,
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PATCH"],
+    allow_headers=["*"],
+)
+
+
+@app.exception_handler(Exception)
+async def generic_exception_handler(request: Request, exc: Exception):
+    logger.error("Unhandled exception", exc_info=exc, path=request.url.path)
+    return JSONResponse(status_code=500, content={"detail": "Internal server error"})
+
+
+app.include_router(claims_router, prefix="/api/v1/claims", tags=["Claims"])
+
+metrics_app = make_asgi_app()
+app.mount("/metrics", metrics_app)
+
+
+@app.get("/health", tags=["Infra"])
+async def health_check():
+    return {
+        "status": "healthy",
+        "service": "claims-service",
+        "version": "2.0.0",
+        "consumer_running": consumer_task is not None and not consumer_task.done(),
+    }
+
+
+@app.get("/ready", tags=["Infra"])
+async def readiness_check():
+    from shared.database import engine as db_engine
+    from shared.redis_client import get_redis
+    from sqlalchemy import text
+
+    checks = {}
+    try:
+        async with db_engine.connect() as conn:
+            await conn.execute(text("SELECT 1"))
+        checks["database"] = "ok"
+    except Exception as e:
+        checks["database"] = f"error: {e}"
+
+    try:
+        redis = await get_redis()
+        await redis.ping()
+        checks["redis"] = "ok"
+    except Exception as e:
+        checks["redis"] = f"error: {e}"
+
+    checks["redpanda_consumer"] = (
+        "ok" if consumer_task and not consumer_task.done() else "not_running"
+    )
+
+    all_ok = all(v == "ok" for v in checks.values())
+    return JSONResponse(
+        status_code=200 if all_ok else 503,
+        content={"status": "ready" if all_ok else "not_ready", "checks": checks},
+    )
+
+
+if __name__ == "__main__":
+    uvicorn.run(
+        "main:app",
+        host="0.0.0.0",
+        port=settings.service_port,
+        reload=False,
+        log_level=settings.log_level.lower(),
+        workers=1,  # Single worker — consumer is not multi-process safe
+    )

@@ -1,0 +1,325 @@
+# GigShield — Judge Demo Compose
+# Starts 8 containers (no observability stack)
+# Target cold start: < 90 seconds
+# Run: docker compose -f docker-compose.demo.yml up -d
+# Demo entry point: POST http://localhost:8003/api/v1/trigger/test
+
+version: "3.9"
+
+networks:
+  gigshield-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  postgres-data:
+  redis-data:
+  redpanda-data:
+
+x-common-env: &common-env
+  DB_HOST: postgres
+  DB_PORT: "5432"
+  DB_NAME: gigshield
+  DB_USER: gigshield
+  DB_PASSWORD: ${DB_PASSWORD:-gigshield_secure_2026}
+  REDIS_URL: redis://:${REDIS_PASSWORD:-redis_secure_2026}@redis:6379/0
+  REDPANDA_BROKERS: redpanda:9092
+  LOG_LEVEL: INFO
+  ENV: development
+
+x-service-defaults: &service-defaults
+  restart: unless-stopped
+  networks:
+    - gigshield-net
+  env_file: .env
+  logging:
+    driver: "json-file"
+    options:
+      max-size: "5m"
+      max-file: "2"
+
+services:
+
+  # ────────────────────────────────────────────────
+  # INFRASTRUCTURE (3 containers + 1 one-shot init)
+  # ────────────────────────────────────────────────
+
+  postgres:
+    <<: *service-defaults
+    image: postgis/postgis:15-3.3-alpine
+    container_name: gigshield-postgres
+    environment:
+      POSTGRES_DB: gigshield
+      POSTGRES_USER: gigshield
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-gigshield_secure_2026}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./migrations/01_init.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
+      - ./migrations/02_zones.sql:/docker-entrypoint-initdb.d/02_zones.sql:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gigshield -d gigshield"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  redis:
+    <<: *service-defaults
+    image: redis:7-alpine
+    container_name: gigshield-redis
+    command: >
+      redis-server
+      --requirepass ${REDIS_PASSWORD:-redis_secure_2026}
+      --maxmemory 128mb
+      --maxmemory-policy allkeys-lru
+      --appendonly no
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-redis_secure_2026}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redpanda:
+    <<: *service-defaults
+    image: redpandadata/redpanda:v23.3.5
+    container_name: gigshield-redpanda
+    command:
+      - redpanda
+      - start
+      - --kafka-addr=internal://0.0.0.0:9092,external://0.0.0.0:19092
+      - --advertise-kafka-addr=internal://redpanda:9092,external://localhost:19092
+      - --pandaproxy-addr=internal://0.0.0.0:8082,external://0.0.0.0:18082
+      - --advertise-pandaproxy-addr=internal://redpanda:8082,external://localhost:18082
+      - --rpc-addr=redpanda:33145
+      - --advertise-rpc-addr=redpanda:33145
+      - --smp=1
+      - --memory=256M
+      - --mode=dev-container
+      - --default-log-level=error
+    volumes:
+      - redpanda-data:/var/lib/redpanda/data
+    ports:
+      - "19092:19092"
+      - "18082:18082"
+    healthcheck:
+      test: ["CMD-SHELL", "rpk cluster health | grep -E 'Healthy:.+true' || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 15s
+
+  # One-shot topic creation — exits after creating topics
+  redpanda-init:
+    <<: *service-defaults
+    image: redpandadata/redpanda:v23.3.5
+    container_name: gigshield-redpanda-init
+    restart: "no"
+    entrypoint: /bin/bash
+    command: >
+      -c "
+      echo 'Waiting for Redpanda broker...' &&
+      rpk cluster health --brokers redpanda:9092 --watch --exit-when-healthy &&
+      echo 'Creating topics...' &&
+      rpk topic create processed.trigger.events --brokers redpanda:9092 -p 3 -r 1 2>/dev/null;
+      rpk topic create claims.approved --brokers redpanda:9092 -p 3 -r 1 2>/dev/null;
+      rpk topic create claims.soft_hold --brokers redpanda:9092 -p 3 -r 1 2>/dev/null;
+      rpk topic create claims.blocked --brokers redpanda:9092 -p 3 -r 1 2>/dev/null;
+      rpk topic create payments.completed --brokers redpanda:9092 -p 3 -r 1 2>/dev/null;
+      echo 'Topics created ✓'
+      "
+    depends_on:
+      redpanda:
+        condition: service_healthy
+
+  # ─────────────────────────────────────────────
+  # MICROSERVICES (5 containers)
+  # ─────────────────────────────────────────────
+
+  worker-service:
+    <<: *service-defaults
+    build:
+      context: .
+      dockerfile: ./services/worker_service/Dockerfile
+      target: production
+    container_name: gigshield-worker-service
+    environment:
+      <<: *common-env
+      SERVICE_NAME: worker-service
+      SERVICE_PORT: "8001"
+    ports:
+      - "8001:8001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8001/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  policy-service:
+    <<: *service-defaults
+    build:
+      context: .
+      dockerfile: ./services/policy_service/Dockerfile
+      target: production
+    container_name: gigshield-policy-service
+    environment:
+      <<: *common-env
+      SERVICE_NAME: policy-service
+      SERVICE_PORT: "8002"
+      WORKER_SERVICE_URL: http://worker-service:8001
+    ports:
+      - "8002:8002"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      worker-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8002/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  trigger-engine:
+    <<: *service-defaults
+    build:
+      context: .
+      dockerfile: ./services/trigger_engine/Dockerfile
+      target: production
+    container_name: gigshield-trigger-engine
+    environment:
+      <<: *common-env
+      SERVICE_NAME: trigger-engine
+      SERVICE_PORT: "8003"
+      OWM_API_KEY: ${OWM_API_KEY:-demo_key_replace_me}
+      CPCB_API_KEY: ${CPCB_API_KEY:-demo_key_replace_me}
+      TRIGGER_POLL_INTERVAL_MINUTES: "15"
+      POLICY_SERVICE_URL: http://policy-service:8002
+    ports:
+      - "8003:8003"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      redpanda:
+        condition: service_healthy
+      redpanda-init:
+        condition: service_completed_successfully
+      policy-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8003/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  claims-service:
+    <<: *service-defaults
+    build:
+      context: .
+      dockerfile: ./services/claims_service/Dockerfile
+      target: production
+    container_name: gigshield-claims-service
+    environment:
+      <<: *common-env
+      SERVICE_NAME: claims-service
+      SERVICE_PORT: "8004"
+    ports:
+      - "8004:8004"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      redpanda:
+        condition: service_healthy
+      redpanda-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8004/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  payment-service:
+    <<: *service-defaults
+    build:
+      context: .
+      dockerfile: ./services/payment_service/Dockerfile
+      target: production
+    container_name: gigshield-payment-service
+    environment:
+      <<: *common-env
+      SERVICE_NAME: payment-service
+      SERVICE_PORT: "8005"
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID:-demo_key}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET:-demo_secret}
+      FIREBASE_SERVICE_ACCOUNT_PATH: ${FIREBASE_SERVICE_ACCOUNT_PATH:-}
+      FCM_DISPATCH_ENABLED: ${FCM_DISPATCH_ENABLED:-true}
+      SOFT_HOLD_RELEASE_SECONDS: "30"
+    ports:
+      - "8005:8005"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      redpanda:
+        condition: service_healthy
+      redpanda-init:
+        condition: service_completed_successfully
+      claims-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8005/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  ml-service:
+    <<: *service-defaults
+    build:
+      context: .
+      dockerfile: ./services/ml_service/Dockerfile
+      target: production
+    container_name: gigshield-ml-service
+    environment:
+      <<: *common-env
+      SERVICE_NAME: ml-service
+      SERVICE_PORT: "8006"
+      MODEL_DIR: /app/ml/models
+    volumes:
+      - ./ml/models:/app/ml/models:ro
+    ports:
+      - "8006:8006"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8006/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s

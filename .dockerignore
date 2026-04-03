@@ -1,0 +1,48 @@
+# GigShield .dockerignore
+# Prevents Docker from sending unnecessary files as build context
+# when using context: . (repo root)
+
+# Version control
+.git
+.gitignore
+
+# React Native / Expo app (built separately)
+worker-app/node_modules
+worker-app/.expo
+worker-app/android
+worker-app/ios
+
+# Python caches
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/.pytest_cache
+
+# IDE and editor
+.vscode
+.idea
+*.swp
+*.swo
+
+# Documentation & CI (not needed in containers)
+*.md
+!services/*/README.md
+.github
+docs
+phase_1_documents
+
+# Monitoring configs (mounted as volumes, not copied)
+monitoring
+
+# Test files
+**/tests
+**/test_*.py
+
+# Environment files (injected via env_file, not copied)
+.env
+.env.*
+
+# Misc
+*.log
+tmp
+.dockerignore
