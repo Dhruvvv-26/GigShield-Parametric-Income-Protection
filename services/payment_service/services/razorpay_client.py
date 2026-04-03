@@ -35,8 +35,11 @@ class RazorpayPayoutClient:
     def __init__(self):
         self._key_id = getattr(settings, "razorpay_key_id", "")
         self._key_secret = getattr(settings, "razorpay_key_secret", "")
-        self._is_live = bool(self._key_id and self._key_secret
-                             and not self._key_id.startswith("demo"))
+        self._is_live = bool(
+            self._key_id and self._key_secret
+            and not self._key_id.startswith("demo")
+            and not self._key_id.startswith("rzp_test_")
+        )
 
     @property
     def is_live_mode(self) -> bool:

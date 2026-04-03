@@ -15,14 +15,13 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import * as SecureStore from 'expo-secure-store';
-import api from '../lib/api';
+import { 
+  getWorkerProfile, getActivePolicy, getZoneWeather, getWorkerPayments, getWorkerClaims, WORKER_ID, SERVICES 
+} from '../lib/api';
 import { colors, spacing, borderRadius, fonts, shadows } from '../lib/theme';
 import GPSCamera from '../components/GPSCamera';
 
 const { width } = Dimensions.get('window');
-
-// Demo worker ID — in production, this comes from auth
-const DEMO_WORKER_ID = '00000000-0000-0000-0000-000000000001';
 
 const EVENT_ICONS: Record<string, string> = {
   aqi: 'cloud',
@@ -43,16 +42,13 @@ const EVENT_COLORS: Record<string, string> = {
 };
 
 export default function HomeScreen() {
-  const [workerId, setWorkerId] = useState<string>(DEMO_WORKER_ID);
+  const [workerId, setWorkerId] = useState<string>(WORKER_ID || '');
   const [showCamera, setShowCamera] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const pulseAnim = new Animated.Value(1);
 
   useEffect(() => {
-    (async () => {
-      const stored = await SecureStore.getItemAsync('worker_id');
-      if (stored) setWorkerId(stored);
-    })();
+    if (WORKER_ID) setWorkerId(WORKER_ID);
   }, []);
 
   // Active trigger pulse animation
@@ -75,40 +71,41 @@ export default function HomeScreen() {
     return () => animation.stop();
   }, []);
 
-  // Fetch notifications (latest events)
-  const { data: notifications, refetch, isLoading } = useQuery({
-    queryKey: ['notifications', workerId],
+  // Fetch all dashboard data
+  const { data: dashboardData, refetch, isLoading } = useQuery({
+    queryKey: ['dashboard', workerId],
     queryFn: async () => {
-      const res = await api.notifications.get(
-        `/api/v1/notifications/worker/${workerId}`
-      );
-      return res.data;
-    },
-    refetchInterval: 5000,
-  });
+      const [policy, claims, payments, trigger] = await Promise.allSettled([
+        getActivePolicy(),
+        getWorkerClaims(),
+        getWorkerPayments(),
+        getZoneWeather(),
+      ]);
 
-  // Fetch payment summary
-  const { data: summary } = useQuery({
-    queryKey: ['paymentSummary'],
-    queryFn: async () => {
-      const res = await api.payments.get('/api/v1/payments/summary');
-      return res.data;
-    },
-    refetchInterval: 15000,
-  });
-
-  // Fetch trigger status
-  const { data: triggerStatus } = useQuery({
-    queryKey: ['triggerStatus'],
-    queryFn: async () => {
-      const res = await api.trigger.get('/api/v1/trigger/status');
-      return res.data;
+      return {
+        policy: policy.status === 'fulfilled' ? policy.value : null,
+        claims: claims.status === 'fulfilled' ? claims.value : [],
+        payments: payments.status === 'fulfilled' ? payments.value : [],
+        triggerStatus: trigger.status === 'fulfilled' ? trigger.value : null,
+      };
     },
     refetchInterval: 10000,
   });
 
-  const activeTriggers = triggerStatus?.active_trigger_count || 0;
-  const latestNotifications = notifications?.notifications?.slice(0, 3) || [];
+  const activePolicy = dashboardData?.policy;
+  const claims = dashboardData?.claims || [];
+  const payments = dashboardData?.payments || [];
+  const triggerStatus = dashboardData?.triggerStatus;
+
+  const activeTriggers = (triggerStatus as any)?.active_trigger_count || 0;
+  
+  // Use payments as activity history
+  const latestActivity = payments.slice(0, 3).map((p: any) => ({
+    event_type: 'processing',
+    title: `Payout ${p.status === 'completed' ? 'Credited' : 'Processing'}`,
+    body: `₹${p.payout_amount} for your recent claim.`,
+    sent_at: p.created_at || new Date().toISOString()
+  }));
 
   const handleClaimPayout = () => {
     setShowCamera(true);
@@ -146,7 +143,7 @@ export default function HomeScreen() {
     try {
       // Mocking hardware sensors for demo purposes
       const sensorData = {
-        active_zone_id: triggerStatus?.zone_id || "demo-zone-id", // Included for Bouncer check
+        active_zone_id: (triggerStatus as any)?.zone_id || "demo-zone-id", // Included for Bouncer check
         accelerometer_rms: 3.5, // moving
         gyroscope_yaw_rate: 0.2, // standard device handling
         is_mock_location: false,
@@ -162,7 +159,15 @@ export default function HomeScreen() {
 
       // Vuln D: Retry with exponential backoff (1s → 2s → 4s) for network failures
       const res = await retryWithBackoff(
-        () => api.claims.post(`/api/v1/claims/sensor_data/${workerId}`, sensorData)
+        async () => {
+          const response = await fetch(`${SERVICES.claims}/api/v1/claims/sensor_data/${workerId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(sensorData)
+          });
+          if (!response.ok) throw { response, status: response.status, data: await response.json().catch(()=>({})) };
+          return response;
+        }
       );
       
       if (res.status === 202) {
@@ -243,17 +248,19 @@ export default function HomeScreen() {
         <View style={styles.coverageDetails}>
           <View style={styles.detailItem}>
             <Text style={styles.detailLabel}>Weekly Premium</Text>
-            <Text style={styles.detailValue}>₹67.60</Text>
+            <Text style={styles.detailValue}>₹{activePolicy?.premium_amount || '0'}</Text>
           </View>
           <View style={styles.divider} />
           <View style={styles.detailItem}>
             <Text style={styles.detailLabel}>Max Payout</Text>
-            <Text style={styles.detailValue}>₹600/event</Text>
+            <Text style={styles.detailValue}>₹{activePolicy?.max_payout_amount || '0'}</Text>
           </View>
           <View style={styles.divider} />
           <View style={styles.detailItem}>
             <Text style={styles.detailLabel}>Renewal</Text>
-            <Text style={styles.detailValue}>Apr 7</Text>
+            <Text style={styles.detailValue}>
+              {activePolicy?.end_date ? new Date(activePolicy.end_date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' }) : 'N/A'}
+            </Text>
           </View>
         </View>
       </View>
@@ -263,23 +270,23 @@ export default function HomeScreen() {
         <View style={[styles.statCard, { borderLeftColor: colors.success }]}>
           <Ionicons name="cash" size={20} color={colors.success} />
           <Text style={styles.statValue}>
-            ₹{summary?.total_payouts_this_week?.toFixed(0) || '0'}
+            ₹{claims?.reduce((sum: number, c: any) => sum + ((c?.status === 'completed' || c?.status === 'auto_approved') ? (c?.payout_amount || 0) : 0), 0).toFixed(0)}
           </Text>
-          <Text style={styles.statLabel}>Payouts This Week</Text>
+          <Text style={styles.statLabel}>Total Earned</Text>
         </View>
         <View style={[styles.statCard, { borderLeftColor: colors.primary }]}>
           <Ionicons name="calendar" size={20} color={colors.primary} />
           <Text style={styles.statValue}>
-            {summary?.active_policies || 0}
+            {activePolicy ? 'Active' : 'Inactive'}
           </Text>
-          <Text style={styles.statLabel}>Active Policies</Text>
+          <Text style={styles.statLabel}>Coverage</Text>
         </View>
         <View style={[styles.statCard, { borderLeftColor: colors.warning }]}>
           <Ionicons name="analytics" size={20} color={colors.warning} />
           <Text style={styles.statValue}>
-            {summary?.loss_ratio_percent?.toFixed(0) || '0'}%
+            {claims.length}
           </Text>
-          <Text style={styles.statLabel}>Loss Ratio</Text>
+          <Text style={styles.statLabel}>Total Claims</Text>
         </View>
       </View>
 
@@ -314,12 +321,12 @@ export default function HomeScreen() {
         <Text style={styles.sectionTitle}>Recent Activity</Text>
       </View>
 
-      {latestNotifications.length > 0 ? (
-        latestNotifications.map((notif: any, idx: number) => (
+      {latestActivity.length > 0 ? (
+        latestActivity.map((notif: any, idx: number) => (
           <View key={idx} style={styles.activityCard}>
             <View style={styles.activityIcon}>
               <Ionicons
-                name={EVENT_ICONS[notif.event_type] || 'notifications'}
+                name={(EVENT_ICONS[notif.event_type] || 'notifications') as any}
                 size={20}
                 color={colors.primary}
               />

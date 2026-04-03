@@ -21,13 +21,17 @@ volumes:
   grafana-data:
 
 x-common-env: &common-env
-  DB_HOST: postgres
+  DB_HOST: gigshield-postgres
   DB_PORT: "5432"
   DB_NAME: gigshield
   DB_USER: gigshield
   DB_PASSWORD: ${DB_PASSWORD:-gigshield_secure_2026}
-  REDIS_URL: redis://:${REDIS_PASSWORD:-redis_secure_2026}@redis:6379/0
-  REDPANDA_BROKERS: redpanda:9092
+  REDIS_URL: redis://:${REDIS_PASSWORD:-redis_secure_2026}@gigshield-redis:6379/0
+  REDPANDA_BROKERS: gigshield-redpanda:9092
+  WORKER_SERVICE_URL: http://gigshield-worker-service:8001
+  POLICY_SERVICE_URL: http://gigshield-policy-service:8002
+  CLAIMS_SERVICE_URL: http://gigshield-claims-service:8004
+  PAYMENT_SERVICE_URL: http://gigshield-payment-service:8005
   LOG_LEVEL: INFO
   ENV: development
 

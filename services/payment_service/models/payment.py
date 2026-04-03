@@ -65,7 +65,9 @@ class Claim(Base):
     policy_id        = Column(UUID(as_uuid=True), nullable=False)
     worker_id        = Column(UUID(as_uuid=True), nullable=False)
     trigger_event_id = Column(UUID(as_uuid=True), nullable=False)
-    status           = Column(String(20), nullable=False, default="pending")
+    status           = Column(Enum("pending", "auto_approved", "soft_hold", "blocked", "completed", "rejected",
+                                   name="claim_status", create_type=False),
+                              nullable=False, default="pending")
     payout_amount    = Column(Numeric(8, 2), nullable=False)
     fraud_score      = Column(Numeric(5, 4))
     created_at       = Column(DateTime(timezone=True), nullable=False,

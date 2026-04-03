@@ -15,7 +15,7 @@
  *      +919999900002 → 123456
  *   3. These test numbers bypass real SMS delivery — ideal for hackathon demos
  */
-import 'react-native-url-polyfill/dist/setup';
+import 'react-native-url-polyfill/auto';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient } from '@supabase/supabase-js';
 

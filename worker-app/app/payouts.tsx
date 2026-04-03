@@ -15,10 +15,8 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import * as SecureStore from 'expo-secure-store';
-import api from '../lib/api';
+import { getWorkerClaims, getWorkerPayments } from '../lib/api';
 import { colors, spacing, borderRadius, fonts } from '../lib/theme';
-
-const DEMO_WORKER_ID = '00000000-0000-0000-0000-000000000001';
 
 const STATUS_COLORS: Record<string, string> = {
   completed: colors.success,
@@ -54,14 +52,12 @@ export default function PayoutsScreen() {
     queryKey: ['payouts'],
     queryFn: async () => {
       const [claimsRes, paymentsRes] = await Promise.allSettled([
-        api.claims.get(`/api/v1/claims/worker/${DEMO_WORKER_ID}`),
-        api.payments.get(`/api/v1/payments/worker/${DEMO_WORKER_ID}`),
+        getWorkerClaims(),
+        getWorkerPayments(),
       ]);
 
-      const claims = claimsRes.status === 'fulfilled'
-        ? claimsRes.value.data.claims || [] : [];
-      const payments = paymentsRes.status === 'fulfilled'
-        ? paymentsRes.value.data.payments || [] : [];
+      const claims = claimsRes.status === 'fulfilled' ? claimsRes.value : [];
+      const payments = paymentsRes.status === 'fulfilled' ? paymentsRes.value : [];
 
       return { claims, payments };
     },
@@ -72,11 +68,11 @@ export default function PayoutsScreen() {
   const payments = data?.payments || [];
 
   // Merge claims with payment status
-  const payoutItems = claims.map((claim: any) => {
-    const payment = payments.find((p: any) => p.claim_id === claim.claim_id);
+  const payoutItems = (claims || []).map((claim: any) => {
+    const payment = payments.find((p: any) => p?.claim_id === claim?.claim_id);
     return {
       ...claim,
-      paymentStatus: payment?.status || claim.status,
+      paymentStatus: payment?.status || claim?.status,
       razorpayId: payment?.razorpay_payout_id,
       upiMasked: payment?.upi_id_masked,
     };
@@ -96,8 +92,8 @@ export default function PayoutsScreen() {
         <View style={styles.summaryRow}>
           <View style={styles.summaryItem}>
             <Text style={styles.summaryValue}>
-              ₹{payoutItems.reduce((sum: number, p: any) =>
-                sum + (p.paymentStatus === 'completed' ? p.payout_amount : 0), 0).toFixed(0)}
+              ₹{payoutItems?.reduce((sum: number, p: any) =>
+                sum + ((p?.paymentStatus === 'completed' || p?.paymentStatus === 'auto_approved') ? (p?.payout_amount || 0) : 0), 0).toFixed(0)}
             </Text>
             <Text style={styles.summaryLabel}>Total Credited</Text>
           </View>
@@ -159,7 +155,7 @@ export default function PayoutsScreen() {
                 </Text>
               </View>
               <View style={{ alignItems: 'flex-end' }}>
-                <Text style={styles.payoutAmount}>₹{item.payout_amount}</Text>
+                <Text style={styles.payoutAmount}>₹{item?.payout_amount}</Text>
                 <View style={[styles.statusBadge, {
                   backgroundColor: `${STATUS_COLORS[item.paymentStatus]}20`,
                 }]}>

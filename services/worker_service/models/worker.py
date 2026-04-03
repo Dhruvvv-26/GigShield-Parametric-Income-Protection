@@ -34,7 +34,7 @@ class Zone(Base):
     )
 
     # Relationships
-    workers  = relationship("Worker", back_populates="zone")
+    workers  = relationship("Worker", primaryjoin="Zone.id == Worker.zone_id", back_populates="zone")
 
 
 class Worker(Base):
@@ -82,7 +82,7 @@ class Worker(Base):
     )
 
     # Relationships
-    zone     = relationship("Zone", back_populates="workers")
+    zone     = relationship("Zone", foreign_keys=[zone_id], primaryjoin="Worker.zone_id == Zone.id", back_populates="workers")
 
 
 class GpsPing(Base):

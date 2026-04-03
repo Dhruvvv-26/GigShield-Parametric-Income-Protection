@@ -1,27 +1,84 @@
-/**
- * GigShield — API Client Configuration
- * Configured for local development via Expo Go.
- */
-import axios from 'axios';
+// lib/api.ts
+// GigShield API Service — wired to live backend
 
-// When running on physical device, replace with your machine's LAN IP
-// e.g., 'http://192.168.1.100'
-const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://10.0.2.2';
+// Dynamically pull the exact IDs we just tested in the backend
+const WORKER_ID = process.env.EXPO_PUBLIC_WORKER_ID;
+const POLICY_ID = process.env.EXPO_PUBLIC_POLICY_ID;
 
-export const api = {
-  worker:       axios.create({ baseURL: `${BASE_URL}:8001`, timeout: 10000 }),
-  policy:       axios.create({ baseURL: `${BASE_URL}:8002`, timeout: 10000 }),
-  trigger:      axios.create({ baseURL: `${BASE_URL}:8003`, timeout: 10000 }),
-  claims:       axios.create({ baseURL: `${BASE_URL}:8004`, timeout: 10000 }),
-  payments:     axios.create({ baseURL: `${BASE_URL}:8005`, timeout: 10000 }),
-  notifications: axios.create({ baseURL: `${BASE_URL}:8006`, timeout: 10000 }),
+// For Expo Go on physical device: use your machine's local IP
+const LOCAL_IP = process.env.EXPO_PUBLIC_API_HOST;
+
+export const SERVICES = {
+  worker:  `http://${LOCAL_IP}:8001`,
+  policy:  `http://${LOCAL_IP}:8002`,
+  trigger: `http://${LOCAL_IP}:8003`,
+  claims:  `http://${LOCAL_IP}:8004`,
+  payment: `http://${LOCAL_IP}:8005`,
+  ml:      `http://${LOCAL_IP}:8006`,
 };
 
-// Add auth interceptor (JWT from SecureStore)
-export const setAuthToken = (token: string) => {
-  Object.values(api).forEach((instance) => {
-    instance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+// ── Helper ────────────────────────────────────────────────────────────────────
+async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
+  const res = await fetch(url, {
+    ...options,
+    headers: { "Content-Type": "application/json", ...(options?.headers || {}) },
   });
+  if (!res.ok) throw new Error(`API error ${res.status} at ${url}`);
+  return res.json();
+}
+
+// ── Worker / Policy ───────────────────────────────────────────────────────────
+export async function getWorkerProfile() {
+  return apiFetch(`${SERVICES.worker}/api/v1/riders/${WORKER_ID}`);
+}
+
+export async function getActivePolicy() {
+  const policies: any = await apiFetch(
+    `${SERVICES.policy}/api/v1/policies/worker/${WORKER_ID}`
+  );
+  // sometimes policies is an array or { policies: [] }
+  const list = policies.policies || policies || [];
+  return Array.isArray(list) ? list.find((p: any) => p.status === "active") ?? null : null;
+}
+
+export async function getPremiumBreakdown(policyId = POLICY_ID) {
+  return apiFetch(`${SERVICES.policy}/api/v1/policies/${policyId}`);
+}
+
+// ── Disruption Monitor (live weather for delhi_rohini) ────────────────────────
+export async function getZoneWeather() {
+  return apiFetch(`${SERVICES.trigger}/api/v1/trigger/status`);
+}
+
+// ── Payouts / Claims ──────────────────────────────────────────────────────────
+export const getWorkerClaims = async () => {
+  const response = await fetch(`${SERVICES.claims}/api/v1/claims/worker/${WORKER_ID}`);
+  const data = await response.json();
+  return data.claims || [];
 };
 
-export default api;
+export const getWorkerPayments = async () => {
+  const response = await fetch(`${SERVICES.payment}/api/v1/payments/worker/${WORKER_ID}`);
+  const data = await response.json();
+  return data.payments || [];
+};
+
+// ── GPS / Sensor Ping (background, silent) ────────────────────────────────────
+export async function sendSensorPing(payload: {
+  latitude?: number;
+  longitude?: number;
+  accuracy_meters?: number;
+  accelerometer_rms?: number;
+  gyroscope_yaw?: number;
+  is_mock_location?: boolean;
+  is_developer_mode?: boolean;
+  gps_cold_start_ms?: number;
+  [key: string]: any;
+}) {
+  return apiFetch(
+    `${SERVICES.worker}/api/v1/riders/${WORKER_ID}/gps`,
+    { method: "POST", body: JSON.stringify(payload) }
+  );
+}
+
+export { WORKER_ID, POLICY_ID, LOCAL_IP };

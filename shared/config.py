@@ -93,11 +93,11 @@ class Settings(BaseSettings):
 
     # Trigger Engine
     trigger_poll_interval_minutes: int = 15
-    policy_service_url: str = "http://localhost:8002"
-    claims_service_url: str = "http://localhost:8004"
-    payment_service_url: str = "http://localhost:8005"
+    policy_service_url: str = "http://policy-service:8002"
+    claims_service_url: str = "http://claims-service:8004"
+    payment_service_url: str = "http://payment-service:8005"
     # notification_service_url removed — FCM now wired directly into Payment Service
-    worker_service_url: str = "http://localhost:8001"
+    worker_service_url: str = "http://worker-service:8001"
 
     # ── Razorpay (test mode by default) ────────────────────────
     razorpay_key_id: str = "demo_key"
