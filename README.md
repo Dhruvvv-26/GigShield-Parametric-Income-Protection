@@ -30,8 +30,9 @@
 10. [Weekly Premium Model](#10-weekly-premium-model)
 11. [Working Prototype](#11-working-prototype)
 12. [Tech Stack — 100% Free, All Verified](#12-tech-stack--100-free-all-verified)
-13. [Team](#13-team)
-14. [Submission Checklist](#14-submission-checklist)
+13. [File Structure & Component Overview](#13-file-structure--component-overview)
+14. [Team](#14-team)
+15. [Submission Checklist](#15-submission-checklist)
 
 ---
 
@@ -730,7 +731,32 @@ Open directly in any modern browser — zero server, zero dependencies, zero ins
 
 ---
 
-## 13. Team
+## 13. File Structure & Component Overview
+
+```text
+KavachAI/
+├── admin-dashboard/       # React/Vite dashboard for admins to view live fraud queues, SHAP charts, and zone maps
+├── api_gateway/           # Nginx reverse proxy routing external requests to the correct internal FastAPI service
+├── migrations/            # SQL scripts to initialize PostGIS zones and system schema in PostgreSQL
+├── ml/                    # Offline training scripts for the XGBoost premium, LSTM trigger, and GradientBoosting fraud models
+├── monitoring/            # Prometheus config to scrape and record metrics from across the microservice cluster
+├── scripts/               # "God Mode" demo scripts and test utilities for simulating E2E events and seeding data
+├── services/              # Core backend: 7 independent FastAPI microservices
+│   ├── claims_service/    # Processes payouts, enforces the Bouncer protocol, and interfaces with the ML Scorer
+│   ├── ml_service/        # Serves real-time inference (fraud, premium, LSTM) heavily cached in Redis
+│   ├── notification_.../  # Listens to Redpanda topics and dispatches FCM push alerts to riders instantly
+│   ├── payment_service/   # Simulates high-trust Razorpay UPI payouts and handles idempotency against duplicates
+│   ├── policy_service/    # Manages worker policies, premium renewals, and active coverage states
+│   ├── trigger_engine/    # APScheduler polling OWM/CPCB feeds, creating geographical disruption events in PostGIS
+│   └── worker_service/    # Handles rider registration, GPS zone clustering assignments, and live location pings
+├── shared/                # Common Python utilities for database mapping, Redis connects, and Redpanda messaging
+├── worker-app/            # The React Native + Expo rider application featuring "Zero-Trust" GPS/sensor verification
+└── docker-compose.yml     # Orchestrates the 11+ microcontainers (PostgreSQL, Redpanda, Redis, FastAPI, etc.)
+```
+
+---
+
+## 14. Team
 
 | Name | Role | Specific Ownership |
 |---|---|---|
@@ -751,7 +777,7 @@ Open directly in any modern browser — zero server, zero dependencies, zero ins
 
 ---
 
-## 14. Submission Checklist
+## 15. Submission Checklist
 
 - [x] **Who is our user, really?** — Section 1 answers with Arjun's specific profile, daily economics, and why he is fundamentally different from a food delivery rider
 - [x] **How does our AI actually work?** — Section 4 answers with algorithm choice rationale, exact feature sets, input/output specification, and training plan for all three models
