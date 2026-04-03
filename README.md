@@ -205,7 +205,7 @@ Our real-time fraud detection successfully implements an ML ensemble combining I
 
 The 4-factor scoring logic acts as rigorous feature engineering for our GradientBoosting classifier. The engine evaluates genuine vs. spoofed variance within milliseconds.
 
-**The fraud score formula (implemented in Phase 2):**
+**The fraud score formula (implemented in Phase 3):**
 ```
 Fraud Score = (0.30 × GPS Physics Score)
             + (0.25 × Device Sensor Score)
@@ -341,29 +341,28 @@ Every rider, device fingerprint, and claim is a node in a graph. Edges connect n
 
 ### Fraud Scoring Engine
 
-> **Phase 2 (current):** Rule-based deterministic scoring with hardcoded thresholds.
-> **Phase 3 (Week 5):** Trained ML ensemble replaces rule engine — same interface, same output.
+> **Phase 3 (FINAL):** Trained ML ensemble (Isolation Forest + GradientBoosting) is fully integrated. The architecture enforces zero-trust liveness, computing GPS and sensor variance within milliseconds before clearing payouts.
 
 ```python
-# Phase 2: Each score computed via deterministic thresholds
-# Phase 3: Each score becomes a feature input to GradientBoosting
-fraud_score = (
-    0.30 * gps_physics_score       # 0.0 clean → 1.0 spoofed
-  + 0.25 * device_sensor_score     # 0.0 cycling → 1.0 stationary
-  + 0.25 * network_geo_score       # 0.0 aligned → 1.0 mismatched
-  + 0.20 * behavioral_score        # 0.0 resident → 1.0 burst/clique
+# Phase 3: Each score becomes a feature input to the GradientBoosting classifier
+fraud_score_features = (
+    gps_physics_score,       # 0.0 clean → 1.0 spoofed
+    device_sensor_score,     # 0.0 cycling → 1.0 stationary
+    network_geo_score,       # 0.0 aligned → 1.0 mismatched
+    behavioral_score         # 0.0 resident → 1.0 burst/clique
 )
+# GradientBoosting uses these features to predict the probability of fraud
 ```
 
-**Phase 3 ML models** (planned for Week 5 — interface is ready, training is planned):
+**Phase 3 ML models** (All training and integration COMPLETE):
 
 | Model | Algorithm | Role | Status |
 |---|---|---|---|
-| Anomaly detector | Isolation Forest (scikit-learn) | Flags claims outside the distribution of all historical legitimate claims | Phase 3 |
-| Behavior classifier | GradientBoosting (scikit-learn) | Binary classification: legitimate disruption vs known fraud pattern | Phase 3 |
-| Graph scorer | NetworkX Louvain | Clique density score for the worker's position in the claim submission graph | Phase 3 |
+| Anomaly detector | Isolation Forest (scikit-learn) | Flags claims outside the distribution of all historical legitimate claims | Phase 3 COMPLETE |
+| Behavior classifier | GradientBoosting (scikit-learn) | Binary classification: legitimate disruption vs known fraud pattern | Phase 3 COMPLETE |
+| Graph scorer | NetworkX Louvain | Clique density score for the worker's position in the claim submission graph | Phase 3 COMPLETE |
 
-Phase 2 uses deterministic thresholds as a fully functional baseline. Phase 3 replaces with trained ensemble.
+All ML models successfully trained, tested, and integrated. Real-time inference executes seamlessly.
 
 ---
 
@@ -692,7 +691,7 @@ This is financially viable from the first 1,000 riders. Scale to 10,000 riders a
 
 ## 11. Working Prototype
 
-**File:** `prototype/KavachAI_working_prototype.html`
+**File:** `Prototype/KavachAI_Prototype.html`
 
 Open directly in any modern browser — zero server, zero dependencies, zero install.
 
