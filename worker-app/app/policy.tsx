@@ -1,5 +1,5 @@
 /**
- * GigShield Worker App — My Policy Screen
+ * KavachAI Worker App — My Policy Screen
  *
  * Displays:
  * - Coverage tier details (Basic/Standard/Premium)

@@ -1,1 +1,1 @@
-"""GigShield Notification Service — OneSignal Push Notifications."""
+"""KavachAI Notification Service — OneSignal Push Notifications."""

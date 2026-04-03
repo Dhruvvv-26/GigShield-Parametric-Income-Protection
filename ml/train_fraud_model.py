@@ -1,5 +1,5 @@
 """
-GigShield ML — Isolation Forest + GradientBoosting Fraud Detection
+KavachAI ML — Isolation Forest + GradientBoosting Fraud Detection
 ====================================================================
 Trains a dual-model fraud ensemble on 50,000 synthetic labeled rows:
   - Isolation Forest (unsupervised anomaly, trained on legitimate-only)
@@ -207,7 +207,7 @@ FEATURE_COLS = [
 
 def train():
     print("=" * 70)
-    print("GigShield Fraud Detection — IsolationForest + GradientBoosting")
+    print("KavachAI Fraud Detection — IsolationForest + GradientBoosting")
     print("=" * 70)
 
     # ── Generate data ─────────────────────────────────────────────────────────

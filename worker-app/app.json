@@ -1,22 +1,22 @@
 {
   "expo": {
-    "name": "GigShield",
-    "slug": "gigshield-worker",
+    "name": "KavachAI",
+    "slug": "kavachai-worker",
     "version": "2.0.0",
     "orientation": "portrait",
-    "scheme": "gigshield",
+    "scheme": "kavachai",
     "userInterfaceStyle": "dark",
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.gigshield.worker",
+      "bundleIdentifier": "com.kavachai.worker",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "GigShield needs your location to verify your zone for claim processing.",
-        "NSLocationAlwaysUsageDescription": "GigShield uses background location for claim verification.",
-        "NSMotionUsageDescription": "GigShield uses motion sensors for anti-fraud verification."
+        "NSLocationWhenInUseUsageDescription": "KavachAI needs your location to verify your zone for claim processing.",
+        "NSLocationAlwaysUsageDescription": "KavachAI uses background location for claim verification.",
+        "NSMotionUsageDescription": "KavachAI uses motion sensors for anti-fraud verification."
       }
     },
     "android": {
-      "package": "com.gigshield.worker",
+      "package": "com.kavachai.worker",
       "permissions": [
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
@@ -33,7 +33,7 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "gigshield-worker"
+        "projectId": "kavachai-worker"
       }
     }
   }

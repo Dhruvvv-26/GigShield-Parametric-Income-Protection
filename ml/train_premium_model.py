@@ -1,5 +1,5 @@
 """
-GigShield ML — XGBoost + LightGBM Premium Pricing Model
+KavachAI ML — XGBoost + LightGBM Premium Pricing Model
 =========================================================
 Trains an ensemble (60% XGB + 40% LGB) on 50,000 synthetic rows
 calibrated to real Q-Commerce and IMD/CPCB data.
@@ -247,7 +247,7 @@ def prepare_features(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
 
 def train():
     print("=" * 70)
-    print("GigShield Premium Pricing — XGBoost + LightGBM Ensemble Training")
+    print("KavachAI Premium Pricing — XGBoost + LightGBM Ensemble Training")
     print("=" * 70)
 
     # ── Generate data ─────────────────────────────────────────────────────────

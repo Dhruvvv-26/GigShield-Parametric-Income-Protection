@@ -33,7 +33,7 @@ class TestRazorpayClient:
         result = self.client._create_simulated_payout(
             worker_upi_id="arjun@oksbi",
             amount_rupees=300.0,
-            narration="GigShield AQI payout",
+            narration="KavachAI AQI payout",
             claim_id=str(uuid4()),
         )
         assert result["payout_id"].startswith("pout_test_")
@@ -46,7 +46,7 @@ class TestRazorpayClient:
         result = self.client._create_simulated_payout(
             worker_upi_id="rider@paytm",
             amount_rupees=500.0,
-            narration="GigShield disruption payout",
+            narration="KavachAI disruption payout",
             claim_id=str(uuid4()),
         )
         rr = result["razorpay_response"]

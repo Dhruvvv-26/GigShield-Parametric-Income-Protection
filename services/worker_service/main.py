@@ -1,5 +1,5 @@
 """
-GigShield — Worker Service
+KavachAI — Worker Service
 Responsibility: Rider registration, profile management, GPS zone assignment.
 Port: 8001
 """
@@ -68,7 +68,7 @@ async def lifespan(app: FastAPI):
 # ── FastAPI App ───────────────────────────────────────────────────────────────
 
 app = FastAPI(
-    title="GigShield Worker Service",
+    title="KavachAI Worker Service",
     description="Q-Commerce rider registration and zone assignment",
     version="1.0.0",
     docs_url="/docs" if settings.env == "development" else None,

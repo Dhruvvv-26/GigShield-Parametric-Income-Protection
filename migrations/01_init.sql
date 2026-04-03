@@ -1,5 +1,5 @@
 -- ============================================================
--- GigShield — Database Schema
+-- KavachAI — Database Schema
 -- Migration 01: Core tables
 -- Run once at container startup via docker-entrypoint-initdb.d
 -- ============================================================

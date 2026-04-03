@@ -29,7 +29,7 @@ from models.payment import Payment, PaymentAuditLog, Claim, Worker
 from services.razorpay_client import RazorpayPayoutClient
 from shared.config import get_settings
 from shared.database import get_db_context
-from shared.messaging import GigShieldConsumer, GigShieldProducer
+from shared.messaging import KavachAIConsumer, KavachAIProducer
 from shared.redis_client import get_redis
 
 logger = logging.getLogger(__name__)
@@ -82,13 +82,13 @@ def _build_fcm_body(status: str, amount: float, held_amount: float, event_type: 
       BLOCKED:   "Your claim is under review. Our team will contact you within 24 hours."
     """
     if status in ("completed", "auto_approved", "approved"):
-        title = "GigShield — Payout Confirmed ✓"
+        title = "KavachAI — Payout Confirmed ✓"
         body = f"₹{amount:.0f} credited to your UPI. Disruption cover applied."
     elif status == "soft_hold":
-        title = "GigShield — Partial Payout"
+        title = "KavachAI — Partial Payout"
         body = f"₹{amount:.0f} credited. ₹{held_amount:.0f} under 2-hour verification."
     else:
-        title = "GigShield — Claim Update"
+        title = "KavachAI — Claim Update"
         body = "Your claim is under review. Our team will contact you within 24 hours."
     return {"title": title, "body": body}
 
@@ -174,14 +174,14 @@ DAILY_PAYOUT_CAP_PER_WORKER = 2000.0   # ₹2,000 per worker per day
 MAX_PAYOUTS_PER_7_DAYS = 3             # Velocity limit
 
 
-class ClaimsPaymentConsumer(GigShieldConsumer):
+class ClaimsPaymentConsumer(KavachAIConsumer):
     """
     Consumes approved and soft_hold claims from Redpanda.
     Creates payments via Razorpay, emits completion events,
     and dispatches FCM push notifications directly (no Notification Service).
     """
 
-    def __init__(self, producer: GigShieldProducer):
+    def __init__(self, producer: KavachAIProducer):
         super().__init__(
             topics=[settings.topic_claims_approved, "claims.soft_hold"],
             group_id="payment_consumer",
@@ -313,7 +313,7 @@ class ClaimsPaymentConsumer(GigShieldConsumer):
             db.add(audit_pending)
 
             # ── Razorpay Payout ──────────────────────────────────────────────
-            narration = f"GigShield {event_type} payout — {zone_code}"
+            narration = f"KavachAI {event_type} payout — {zone_code}"
             payout_result = await razorpay.create_payout(
                 worker_upi_id=worker_upi_id,
                 amount_rupees=payout_amount,

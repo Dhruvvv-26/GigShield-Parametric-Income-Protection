@@ -1,5 +1,5 @@
 # ============================================================
-# GigShield — Worker Service
+# KavachAI — Worker Service
 # Multi-stage Docker build for production
 # Build context: repo root (.)
 # ============================================================
@@ -30,16 +30,16 @@ RUN pip install --no-cache-dir --user -r requirements.txt
 FROM base AS production
 
 # Copy installed packages from builder
-COPY --from=builder /root/.local /home/gigshield/.local
-ENV PATH=/home/gigshield/.local/bin:$PATH
+COPY --from=builder /root/.local /home/kavachai/.local
+ENV PATH=/home/kavachai/.local/bin:$PATH
 
 # Copy application code (context = repo root)
 COPY ./services/worker_service /app/
 COPY ./shared /app/shared/
 
 # Non-root user for security
-RUN useradd -m -u 1001 gigshield && chown -R gigshield:gigshield /app
-USER gigshield
+RUN useradd -m -u 1001 kavachai && chown -R kavachai:kavachai /app
+USER kavachai
 
 EXPOSE 8001
 

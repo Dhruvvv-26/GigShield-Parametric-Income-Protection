@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-GigShield — 60-Second Demo Script
+KavachAI — 60-Second Demo Script
 3 checks only. Fast, clean, proves the entire pipeline.
 
 Usage:
@@ -41,7 +41,7 @@ DEMO_SENSOR_DATA = {
 async def run_demo():
     print()
     print("╔══════════════════════════════════════════════════════════════╗")
-    print("║  GigShield — Live Demo: Zero-Touch Parametric Payout       ║")
+    print("║  KavachAI — Live Demo: Zero-Touch Parametric Payout       ║")
     print("║  Pipeline: Trigger → Claim → Fraud → Payout → Push        ║")
     print("╚══════════════════════════════════════════════════════════════╝")
     print()

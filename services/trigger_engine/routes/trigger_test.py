@@ -36,7 +36,7 @@ from integrations.zone_resolver import ZoneResolver
 from shared.config import get_settings
 from shared.database import get_db
 from shared.logging_config import get_logger
-from shared.messaging import GigShieldProducer
+from shared.messaging import KavachAIProducer
 
 logger = get_logger(__name__)
 router = APIRouter()

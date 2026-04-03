@@ -1,5 +1,5 @@
 /**
- * GigShield — Design System Theme
+ * KavachAI — Design System Theme
  * Brand colors, typography, spacing utilities.
  */
 export const colors = {

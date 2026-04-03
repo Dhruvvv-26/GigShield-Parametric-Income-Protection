@@ -164,7 +164,7 @@ class TestWindThresholds:
 
 class TestPayoutTable:
     """
-    Verify payout amounts match the GigShield product spec exactly.
+    Verify payout amounts match the KavachAI product spec exactly.
     These are the values judges will check against the README.
     """
 

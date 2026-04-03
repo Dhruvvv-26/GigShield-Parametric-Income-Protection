@@ -1,4 +1,4 @@
-# GigShield — Judge Demo Compose
+# KavachAI — Judge Demo Compose
 # Starts 8 containers (no observability stack)
 # Target cold start: < 90 seconds
 # Run: docker compose -f docker-compose.demo.yml up -d
@@ -7,7 +7,7 @@
 version: "3.9"
 
 networks:
-  gigshield-net:
+  kavachai-net:
     driver: bridge
     ipam:
       config:
@@ -21,9 +21,9 @@ volumes:
 x-common-env: &common-env
   DB_HOST: postgres
   DB_PORT: "5432"
-  DB_NAME: gigshield
-  DB_USER: gigshield
-  DB_PASSWORD: ${DB_PASSWORD:-gigshield_secure_2026}
+  DB_NAME: kavachai
+  DB_USER: kavachai
+  DB_PASSWORD: ${DB_PASSWORD:-kavachai_secure_2026}
   REDIS_URL: redis://:${REDIS_PASSWORD:-redis_secure_2026}@redis:6379/0
   REDPANDA_BROKERS: redpanda:9092
   LOG_LEVEL: INFO
@@ -32,7 +32,7 @@ x-common-env: &common-env
 x-service-defaults: &service-defaults
   restart: unless-stopped
   networks:
-    - gigshield-net
+    - kavachai-net
   env_file: .env
   logging:
     driver: "json-file"
@@ -49,11 +49,11 @@ services:
   postgres:
     <<: *service-defaults
     image: postgis/postgis:15-3.3-alpine
-    container_name: gigshield-postgres
+    container_name: kavachai-postgres
     environment:
-      POSTGRES_DB: gigshield
-      POSTGRES_USER: gigshield
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-gigshield_secure_2026}
+      POSTGRES_DB: kavachai
+      POSTGRES_USER: kavachai
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-kavachai_secure_2026}
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./migrations/01_init.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
@@ -61,7 +61,7 @@ services:
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U gigshield -d gigshield"]
+      test: ["CMD-SHELL", "pg_isready -U kavachai -d kavachai"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -70,7 +70,7 @@ services:
   redis:
     <<: *service-defaults
     image: redis:7-alpine
-    container_name: gigshield-redis
+    container_name: kavachai-redis
     command: >
       redis-server
       --requirepass ${REDIS_PASSWORD:-redis_secure_2026}
@@ -90,7 +90,7 @@ services:
   redpanda:
     <<: *service-defaults
     image: redpandadata/redpanda:v23.3.5
-    container_name: gigshield-redpanda
+    container_name: kavachai-redpanda
     command:
       - redpanda
       - start
@@ -120,7 +120,7 @@ services:
   redpanda-init:
     <<: *service-defaults
     image: redpandadata/redpanda:v23.3.5
-    container_name: gigshield-redpanda-init
+    container_name: kavachai-redpanda-init
     restart: "no"
     entrypoint: /bin/bash
     command: >
@@ -149,7 +149,7 @@ services:
       context: .
       dockerfile: ./services/worker_service/Dockerfile
       target: production
-    container_name: gigshield-worker-service
+    container_name: kavachai-worker-service
     environment:
       <<: *common-env
       SERVICE_NAME: worker-service
@@ -174,7 +174,7 @@ services:
       context: .
       dockerfile: ./services/policy_service/Dockerfile
       target: production
-    container_name: gigshield-policy-service
+    container_name: kavachai-policy-service
     environment:
       <<: *common-env
       SERVICE_NAME: policy-service
@@ -202,7 +202,7 @@ services:
       context: .
       dockerfile: ./services/trigger_engine/Dockerfile
       target: production
-    container_name: gigshield-trigger-engine
+    container_name: kavachai-trigger-engine
     environment:
       <<: *common-env
       SERVICE_NAME: trigger-engine
@@ -237,7 +237,7 @@ services:
       context: .
       dockerfile: ./services/claims_service/Dockerfile
       target: production
-    container_name: gigshield-claims-service
+    container_name: kavachai-claims-service
     environment:
       <<: *common-env
       SERVICE_NAME: claims-service
@@ -266,7 +266,7 @@ services:
       context: .
       dockerfile: ./services/payment_service/Dockerfile
       target: production
-    container_name: gigshield-payment-service
+    container_name: kavachai-payment-service
     environment:
       <<: *common-env
       SERVICE_NAME: payment-service
@@ -302,7 +302,7 @@ services:
       context: .
       dockerfile: ./services/ml_service/Dockerfile
       target: production
-    container_name: gigshield-ml-service
+    container_name: kavachai-ml-service
     environment:
       <<: *common-env
       SERVICE_NAME: ml-service

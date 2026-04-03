@@ -1,15 +1,15 @@
 {
   "project_info": {
     "project_number": "423678509613",
-    "project_id": "gigshield-demo",
-    "storage_bucket": "gigshield-demo.firebasestorage.app"
+    "project_id": "kavachai-demo",
+    "storage_bucket": "kavachai-demo.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
         "mobilesdk_app_id": "1:423678509613:android:9825d5cef4cbaafbd1eea4",
         "android_client_info": {
-          "package_name": "com.gigshield.app"
+          "package_name": "com.kavachai.app"
         }
       },
       "oauth_client": [],

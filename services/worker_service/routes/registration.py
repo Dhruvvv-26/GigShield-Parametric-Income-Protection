@@ -50,7 +50,7 @@ def _encrypt_upi(upi_id: str) -> str:
     status_code=status.HTTP_201_CREATED,
     summary="Register a new Q-Commerce rider",
     description="""
-    Onboards a Blinkit/Zepto rider onto GigShield.
+    Onboards a Blinkit/Zepto rider onto KavachAI.
     Assigns them to a Q-Commerce zone using PostGIS spatial lookup.
     Returns zone assignment and worker_id for subsequent API calls.
     """,

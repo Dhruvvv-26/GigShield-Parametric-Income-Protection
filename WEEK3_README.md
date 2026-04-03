@@ -1,4 +1,4 @@
-# GigShield — Week 3 Development Deliverable
+# KavachAI — Week 3 Development Deliverable
 ## Phase 2 / SCALE — Backend Core
 
 ---
@@ -7,8 +7,8 @@
 
 ```bash
 # 1. Clone and configure
-git clone https://github.com/Dhruvvv-26/GigShield-Parametric-Income-Protection.git
-cd GigShield-Parametric-Income-Protection
+git clone https://github.com/Dhruvvv-26/KavachAI-Parametric-Income-Protection.git
+cd KavachAI-Parametric-Income-Protection
 cp .env.example .env
 # Edit .env and set OWM_API_KEY (get free key at openweathermap.org)
 
@@ -37,7 +37,7 @@ python scripts/verify_e2e.py
 | Trigger Engine       | http://localhost:8003/docs  | OWM/CPCB polling + test trigger       |
 | Redpanda Console     | http://localhost:8080       | Kafka topic browser                   |
 | Prometheus           | http://localhost:9090       | Metrics                               |
-| Grafana              | http://localhost:3001       | Dashboards (admin / gigshield2026)    |
+| Grafana              | http://localhost:3001       | Dashboards (admin / kavachai2026)    |
 | PostgreSQL           | localhost:5432              | Primary DB + PostGIS                  |
 | Redis                | localhost:6379              | Cache + dedup locks                   |
 
@@ -63,7 +63,7 @@ curl -X POST http://localhost:8001/api/v1/zones/lookup \
 # Expected: {"found": true, "zone": {"zone_code": "delhi_rohini", ...}}
 
 # Via psql (direct DB check):
-docker exec gigshield-postgres psql -U gigshield -d gigshield -c "
+docker exec kavachai-postgres psql -U kavachai -d kavachai -c "
 SELECT zone_code FROM zones
 WHERE ST_Within(ST_SetSRID(ST_MakePoint(77.1100, 28.7300), 4326), boundary);"
 # Expected: delhi_rohini

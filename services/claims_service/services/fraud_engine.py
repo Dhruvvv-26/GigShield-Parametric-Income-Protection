@@ -1,5 +1,5 @@
 """
-GigShield Fraud Detection Engine — Phase 3: ML + Rule-Based Hybrid
+KavachAI Fraud Detection Engine — Phase 3: ML + Rule-Based Hybrid
 
 This module implements the 4-layer adversarial defense engine.
 When trained ML models (IsolationForest + GradientBoosting) are available,

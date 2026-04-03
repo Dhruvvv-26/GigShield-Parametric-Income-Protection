@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-GigShield — Phase 2 End-to-End Verification Script
+KavachAI — Phase 2 End-to-End Verification Script
 Extends Week 3's 16-check suite with 8 new Phase 2 checks:
   17. Claims Service health
   18. Payment Service health
@@ -47,7 +47,7 @@ async def check(label: str, coro) -> bool:
 async def run_checks():
     results = []
     print("\n" + "=" * 60)
-    print("  GigShield Phase 2 — End-to-End Verification")
+    print("  KavachAI Phase 2 — End-to-End Verification")
     print("=" * 60)
 
     async with httpx.AsyncClient(timeout=15.0) as c:

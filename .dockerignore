@@ -1,4 +1,4 @@
-# GigShield .dockerignore
+# KavachAI .dockerignore
 # Prevents Docker from sending unnecessary files as build context
 # when using context: . (repo root)
 

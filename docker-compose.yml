@@ -1,12 +1,12 @@
 version: "3.9"
 
 # ============================================================
-# GigShield — Full Stack Docker Compose
+# KavachAI — Full Stack Docker Compose
 # Phase 2 / Week 3: Worker Service + Policy Service + Trigger Engine
 # ============================================================
 
 networks:
-  gigshield-net:
+  kavachai-net:
     driver: bridge
     ipam:
       config:
@@ -21,24 +21,24 @@ volumes:
   grafana-data:
 
 x-common-env: &common-env
-  DB_HOST: gigshield-postgres
+  DB_HOST: kavachai-postgres
   DB_PORT: "5432"
-  DB_NAME: gigshield
-  DB_USER: gigshield
-  DB_PASSWORD: ${DB_PASSWORD:-gigshield_secure_2026}
-  REDIS_URL: redis://:${REDIS_PASSWORD:-redis_secure_2026}@gigshield-redis:6379/0
-  REDPANDA_BROKERS: gigshield-redpanda:9092
-  WORKER_SERVICE_URL: http://gigshield-worker-service:8001
-  POLICY_SERVICE_URL: http://gigshield-policy-service:8002
-  CLAIMS_SERVICE_URL: http://gigshield-claims-service:8004
-  PAYMENT_SERVICE_URL: http://gigshield-payment-service:8005
+  DB_NAME: kavachai
+  DB_USER: kavachai
+  DB_PASSWORD: ${DB_PASSWORD:-kavachai_secure_2026}
+  REDIS_URL: redis://:${REDIS_PASSWORD:-redis_secure_2026}@kavachai-redis:6379/0
+  REDPANDA_BROKERS: kavachai-redpanda:9092
+  WORKER_SERVICE_URL: http://kavachai-worker-service:8001
+  POLICY_SERVICE_URL: http://kavachai-policy-service:8002
+  CLAIMS_SERVICE_URL: http://kavachai-claims-service:8004
+  PAYMENT_SERVICE_URL: http://kavachai-payment-service:8005
   LOG_LEVEL: INFO
   ENV: development
 
 x-service-defaults: &service-defaults
   restart: unless-stopped
   networks:
-    - gigshield-net
+    - kavachai-net
   logging:
     driver: "json-file"
     options:
@@ -54,11 +54,11 @@ services:
   postgres:
     <<: *service-defaults
     image: postgis/postgis:15-3.3-alpine
-    container_name: gigshield-postgres
+    container_name: kavachai-postgres
     environment:
-      POSTGRES_DB: gigshield
-      POSTGRES_USER: gigshield
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-gigshield_secure_2026}
+      POSTGRES_DB: kavachai
+      POSTGRES_USER: kavachai
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-kavachai_secure_2026}
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./migrations/01_init.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
@@ -66,7 +66,7 @@ services:
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U gigshield -d gigshield"]
+      test: ["CMD-SHELL", "pg_isready -U kavachai -d kavachai"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -75,7 +75,7 @@ services:
   redis:
     <<: *service-defaults
     image: redis:7-alpine
-    container_name: gigshield-redis
+    container_name: kavachai-redis
     command: >
       redis-server
       --requirepass ${REDIS_PASSWORD:-redis_secure_2026}
@@ -95,7 +95,7 @@ services:
   redpanda:
     <<: *service-defaults
     image: redpandadata/redpanda:v23.3.5
-    container_name: gigshield-redpanda
+    container_name: kavachai-redpanda
     command:
       - redpanda
       - start
@@ -124,7 +124,7 @@ services:
   redpanda-console:
     <<: *service-defaults
     image: redpandadata/console:v2.3.8
-    container_name: gigshield-redpanda-console
+    container_name: kavachai-redpanda-console
     depends_on:
       redpanda:
         condition: service_healthy
@@ -145,7 +145,7 @@ services:
       context: .
       dockerfile: ./services/worker_service/Dockerfile
       target: production
-    container_name: gigshield-worker-service
+    container_name: kavachai-worker-service
     environment:
       <<: *common-env
       SERVICE_NAME: worker-service
@@ -170,7 +170,7 @@ services:
       context: .
       dockerfile: ./services/policy_service/Dockerfile
       target: production
-    container_name: gigshield-policy-service
+    container_name: kavachai-policy-service
     environment:
       <<: *common-env
       SERVICE_NAME: policy-service
@@ -198,7 +198,7 @@ services:
       context: .
       dockerfile: ./services/trigger_engine/Dockerfile
       target: production
-    container_name: gigshield-trigger-engine
+    container_name: kavachai-trigger-engine
     environment:
       <<: *common-env
       SERVICE_NAME: trigger-engine
@@ -235,7 +235,7 @@ services:
       context: .
       dockerfile: ./services/claims_service/Dockerfile
       target: production
-    container_name: gigshield-claims-service
+    container_name: kavachai-claims-service
     environment:
       <<: *common-env
       SERVICE_NAME: claims-service
@@ -262,7 +262,7 @@ services:
       context: .
       dockerfile: ./services/payment_service/Dockerfile
       target: production
-    container_name: gigshield-payment-service
+    container_name: kavachai-payment-service
     environment:
       <<: *common-env
       SERVICE_NAME: payment-service
@@ -296,7 +296,7 @@ services:
   prometheus:
     <<: *service-defaults
     image: prom/prometheus:v2.48.0
-    container_name: gigshield-prometheus
+    container_name: kavachai-prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -310,7 +310,7 @@ services:
   grafana:
     <<: *service-defaults
     image: grafana/grafana:10.2.2
-    container_name: gigshield-grafana
+    container_name: kavachai-grafana
     environment:
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin2026}
       GF_USERS_ALLOW_SIGN_UP: "false"

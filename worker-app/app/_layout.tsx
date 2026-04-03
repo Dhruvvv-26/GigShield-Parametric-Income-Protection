@@ -1,5 +1,5 @@
 /**
- * GigShield Worker App — Root Layout (expo-router)
+ * KavachAI Worker App — Root Layout (expo-router)
  * Tab-based navigation with bottom tab bar.
  */
 import React from 'react';
@@ -44,7 +44,7 @@ export default function Layout() {
           name="index"
           options={{
             title: 'Home',
-            headerTitle: 'GigShield',
+            headerTitle: 'KavachAI',
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="shield-checkmark" size={size} color={color} />
             ),

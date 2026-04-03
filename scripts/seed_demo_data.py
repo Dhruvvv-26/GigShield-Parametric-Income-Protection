@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-GigShield — Demo Seed Script
+KavachAI — Demo Seed Script
 Seeds 50 fake Blinkit/Zepto riders with active policies for the demo.
 
 Usage:
@@ -127,7 +127,7 @@ async def create_policy(client: httpx.AsyncClient, worker_id: str, idx: int) -> 
 
 async def main():
     print("=" * 60)
-    print("  GigShield — Demo Data Seeder")
+    print("  KavachAI — Demo Data Seeder")
     print("=" * 60)
 
     async with httpx.AsyncClient() as client:

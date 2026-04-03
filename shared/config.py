@@ -1,5 +1,5 @@
 """
-GigShield — Shared Configuration
+KavachAI — Shared Configuration
 Loaded via pydantic-settings from environment variables.
 All services import from this module.
 """
@@ -17,15 +17,15 @@ class Settings(BaseSettings):
     # ── App ───────────────────────────────────────────────
     env: str = "development"
     log_level: str = "INFO"
-    service_name: str = "gigshield"
+    service_name: str = "kavachai"
     service_port: int = 8000
 
     # ── Database ──────────────────────────────────────────
     db_host: str = "localhost"
     db_port: int = 5432
-    db_name: str = "gigshield"
-    db_user: str = "gigshield"
-    db_password: str = "gigshield_secure_2026"
+    db_name: str = "kavachai"
+    db_user: str = "kavachai"
+    db_password: str = "kavachai_secure_2026"
     db_pool_size: int = 10
     db_max_overflow: int = 20
     db_pool_timeout: int = 30
@@ -123,7 +123,7 @@ class Settings(BaseSettings):
     curfew_tier2_payout: int = 400
     curfew_tier3_payout: int = 700
 
-    # ── GigShield Business Rules ───────────────────────────
+    # ── KavachAI Business Rules ───────────────────────────
     # Cities covered in Phase 1
     covered_cities: list[str] = [
         "delhi_ncr",

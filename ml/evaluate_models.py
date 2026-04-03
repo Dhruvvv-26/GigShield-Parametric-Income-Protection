@@ -1,5 +1,5 @@
 """
-GigShield ML — Model Evaluation Suite
+KavachAI ML — Model Evaluation Suite
 =======================================
 Loads all 3 trained model sets and prints comprehensive metrics.
 
@@ -93,7 +93,7 @@ def evaluate_lstm():
 
 def main():
     print("╔" + "═" * 58 + "╗")
-    print("║  GigShield ML — Complete Model Evaluation Suite            ║")
+    print("║  KavachAI ML — Complete Model Evaluation Suite            ║")
     print("╚" + "═" * 58 + "╝")
 
     results = {}

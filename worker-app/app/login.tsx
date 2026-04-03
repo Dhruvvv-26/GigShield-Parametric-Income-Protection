@@ -1,5 +1,5 @@
 /**
- * GigShield Worker App — Login / OTP Screen (Supabase Auth)
+ * KavachAI Worker App — Login / OTP Screen (Supabase Auth)
  *
  * Uses Supabase Auth for Phone OTP authentication.
  * In development: uses Supabase "Test Phone Numbers" feature to bypass
@@ -128,7 +128,7 @@ export default function LoginScreen() {
           <View style={styles.logoCircle}>
             <Ionicons name="shield-checkmark" size={64} color={colors.primary} />
           </View>
-          <Text style={styles.brandName}>GigShield</Text>
+          <Text style={styles.brandName}>KavachAI</Text>
           <Text style={styles.tagline}>
             Income protection. Automatic. Instant.
           </Text>
@@ -208,7 +208,7 @@ export default function LoginScreen() {
         {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            By continuing, you agree to GigShield's Terms of Service
+            By continuing, you agree to KavachAI's Terms of Service
             and Privacy Policy
           </Text>
         </View>

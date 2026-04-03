@@ -1,5 +1,5 @@
 """
-GigShield — Policy Service
+KavachAI — Policy Service
 Responsibility: Policy creation, renewal, expiry, premium calculation.
 Port: 8002
 """
@@ -61,7 +61,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="GigShield Policy Service",
+    title="KavachAI Policy Service",
     description="Parametric insurance policy lifecycle management + premium calculation",
     version="1.0.0",
     docs_url="/docs" if settings.env == "development" else None,

@@ -1,5 +1,5 @@
 /**
- * GigShield Worker App — Home / Coverage Status Screen
+ * KavachAI Worker App — Home / Coverage Status Screen
  *
  * Displays:
  * - Active policy card (tier, premium, renewal)
@@ -236,12 +236,16 @@ export default function HomeScreen() {
             <Ionicons name="shield-checkmark" size={28} color={colors.primary} />
           </View>
           <View>
-            <Text style={styles.cardTitle}>Coverage Active</Text>
-            <Text style={styles.cardSubtitle}>Standard Tier</Text>
+            <Text style={styles.cardTitle}>{activePolicy?.status === 'active' ? 'Coverage Active' : 'Coverage Inactive'}</Text>
+            <Text style={styles.cardSubtitle}>
+              {activePolicy?.tier?.replace(/_/g, ' ')?.toUpperCase() || 'STANDARD TIER'}
+            </Text>
           </View>
-          <View style={styles.statusBadge}>
-            <View style={styles.activeDot} />
-            <Text style={styles.statusText}>ACTIVE</Text>
+          <View style={[styles.statusBadge, { backgroundColor: activePolicy?.status === 'active' ? 'rgba(0, 230, 118, 0.15)' : 'rgba(255, 82, 82, 0.15)' }]}>
+            <View style={[styles.activeDot, { backgroundColor: activePolicy?.status === 'active' ? colors.success : colors.error }]} />
+            <Text style={[styles.statusText, { color: activePolicy?.status === 'active' ? colors.success : colors.error }]}>
+              {activePolicy?.status?.toUpperCase() || 'INACTIVE'}
+            </Text>
           </View>
         </View>
 
@@ -270,7 +274,7 @@ export default function HomeScreen() {
         <View style={[styles.statCard, { borderLeftColor: colors.success }]}>
           <Ionicons name="cash" size={20} color={colors.success} />
           <Text style={styles.statValue}>
-            ₹{claims?.reduce((sum: number, c: any) => sum + ((c?.status === 'completed' || c?.status === 'auto_approved') ? (c?.payout_amount || 0) : 0), 0).toFixed(0)}
+            ₹{claims?.reduce((sum: number, c: any) => sum + ((c?.status === 'completed' || c?.status === 'auto_approved') ? Number(c?.payout_amount || 0) : 0), 0).toFixed(0)}
           </Text>
           <Text style={styles.statLabel}>Total Earned</Text>
         </View>
@@ -354,7 +358,7 @@ export default function HomeScreen() {
         <Text style={styles.footerText}>
           Income protection. Automatic. Instant.
         </Text>
-        <Text style={styles.footerVersion}>GigShield v3.0 — Phase 3 (ML-Powered)</Text>
+        <Text style={styles.footerVersion}>KavachAI v3.0 — Phase 3 (ML-Powered)</Text>
       </View>
     </ScrollView>
   );

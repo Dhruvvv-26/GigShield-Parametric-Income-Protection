@@ -1,4 +1,4 @@
-# GigShield — Judge Demo Runbook
+# KavachAI — Judge Demo Runbook
 
 ## Prerequisites
 - Docker Desktop running (8GB RAM allocated)
@@ -17,7 +17,7 @@ docker compose -f docker-compose.demo.yml ps
 
 ## Step 2: Seed Demo Data (10 seconds)
 ```bash
-docker exec gigshield-worker-service python scripts/seed_demo.py
+docker exec kavachai-worker-service python scripts/seed_demo.py
 ```
 Seeds 10 riders across 3 zones with active policies.
 
@@ -30,7 +30,7 @@ Expected output:
 ✅ CHECK 1 PASSED — Clean claim auto-approved in 4.2s
 ✅ CHECK 2 PASSED — Suspicious claim soft-held, partial payout in 5.1s
 ✅ CHECK 3 PASSED — GPS spoofing detected and blocked in 3.8s
-🎯 GigShield 5-Star Demo: All checks passed in 13.1s
+🎯 KavachAI 5-Star Demo: All checks passed in 13.1s
 ```
 
 ## What Each Check Demonstrates
@@ -66,10 +66,10 @@ Expected output:
 | Issue | Fix |
 |---|---|
 | Container won't start | `docker compose -f docker-compose.demo.yml logs {service_name}` |
-| Claims not routing | Check Redis is healthy: `docker exec gigshield-redis redis-cli -a redis_secure_2026 ping` |
+| Claims not routing | Check Redis is healthy: `docker exec kavachai-redis redis-cli -a redis_secure_2026 ping` |
 | FCM not sending | Set `FCM_DISPATCH_ENABLED=false` in `.env` — payout still works |
 | Fraud score always 0 | Verify sensor payload is reaching Claims Service: check `claims_service` logs |
-| Redpanda topics missing | Check `redpanda-init` ran: `docker logs gigshield-redpanda-init` |
+| Redpanda topics missing | Check `redpanda-init` ran: `docker logs kavachai-redpanda-init` |
 | Port conflict | Ensure no local services on 5432, 6379, 8001–8005 |
 
 ## Emergency Fallback

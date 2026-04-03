@@ -1,5 +1,5 @@
 """
-GigShield ML — MLflow Tracking Wrapper
+KavachAI ML — MLflow Tracking Wrapper
 ========================================
 Logs parameters, metrics, and model artifacts from all 3 training scripts.
 
@@ -24,8 +24,8 @@ def log_experiment():
         print("MLflow not installed — skipping tracking")
         return
 
-    mlflow.set_tracking_uri("file:///tmp/gigshield_mlruns")
-    mlflow.set_experiment("GigShield-Models")
+    mlflow.set_tracking_uri("file:///tmp/kavachai_mlruns")
+    mlflow.set_experiment("KavachAI-Models")
 
     # ── Premium Model ─────────────────────────────────────────────────────
     meta_path = os.path.join(MODEL_DIR, "premium_meta.pkl")
@@ -112,8 +112,8 @@ def log_experiment():
             print(f"✅ LSTM model logged: Test AUC={meta['test_auc']:.4f}")
 
     print("\n🎉 All models logged to MLflow!")
-    print(f"   Tracking URI: file:///tmp/gigshield_mlruns")
-    print(f"   Run `mlflow ui --backend-store-uri file:///tmp/gigshield_mlruns` to view")
+    print(f"   Tracking URI: file:///tmp/kavachai_mlruns")
+    print(f"   Run `mlflow ui --backend-store-uri file:///tmp/kavachai_mlruns` to view")
 
 
 if __name__ == "__main__":

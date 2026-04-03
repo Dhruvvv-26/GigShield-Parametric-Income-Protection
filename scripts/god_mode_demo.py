@@ -1,5 +1,5 @@
 # ═══════════════════════════════════════════════════════════════════
-# GigShield God Mode Demo Script
+# KavachAI God Mode Demo Script
 # ═══════════════════════════════════════════════════════════════════
 #
 # JUDGE DEMO SEQUENCE (recommended order):
@@ -49,9 +49,9 @@ BASE_URLS = {
 DB_CONFIG = {
     "host": "localhost",
     "port": 5432,
-    "dbname": "gigshield",
-    "user": "gigshield",
-    "password": "gigshield_secure_2026",
+    "dbname": "kavachai",
+    "user": "kavachai",
+    "password": "kavachai_secure_2026",
 }
 
 DEMO_WORKER_ID = "6fc7ae56-8cc2-4d32-b8cf-c21844a177ce"
@@ -92,7 +92,7 @@ def format_box(title: str, delay_text: str = ""):
 
 def cmd_status(args):
     print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-    print("🛡️  GigShield System Status")
+    print("🛡️  KavachAI System Status")
     print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     print("Services:")
     for name, url in BASE_URLS.items():
@@ -339,7 +339,7 @@ def cmd_reset(args):
         print(f"❌ Reset failed: {e}")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="GigShield God Mode Demo Tool")
+    parser = argparse.ArgumentParser(description="KavachAI God Mode Demo Tool")
     subparsers = parser.add_subparsers(dest="command", required=True)
     
     # status

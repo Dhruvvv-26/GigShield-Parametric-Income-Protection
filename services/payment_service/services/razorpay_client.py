@@ -51,7 +51,7 @@ class RazorpayPayoutClient:
         amount_rupees: float,
         narration: str,
         claim_id: str,
-        worker_name: str = "GigShield Worker",
+        worker_name: str = "KavachAI Worker",
     ) -> dict:
         """
         Create a UPI payout to the worker.
@@ -139,7 +139,7 @@ class RazorpayPayoutClient:
             contact_payload = {
                 "name": worker_name,
                 "type": "customer",
-                "notes": {"claim_id": claim_id, "source": "gigshield"},
+                "notes": {"claim_id": claim_id, "source": "kavachai"},
             }
             contact_resp = await client.post(
                 f"{self.BASE_URL}/contacts", json=contact_payload
@@ -188,7 +188,7 @@ class RazorpayPayoutClient:
                 "queue_if_low_balance": True,
                 "reference_id": claim_id,
                 "narration": narration[:30],  # Razorpay max 30 chars
-                "notes": {"claim_id": claim_id, "source": "gigshield"},
+                "notes": {"claim_id": claim_id, "source": "kavachai"},
             }
             payout_resp = await client.post(
                 f"{self.BASE_URL}/payouts", json=payout_payload

@@ -1,5 +1,5 @@
 -- ============================================================
--- GigShield — Zone Seeding
+-- KavachAI — Zone Seeding
 -- Migration 02: Pre-load Q-Commerce zone polygons
 -- Phase 1 cities: Delhi NCR, Mumbai, Bengaluru
 -- All coordinates in WGS84 (SRID 4326)

@@ -1,5 +1,5 @@
 """
-GigShield Trigger Engine — Unified API Pollers
+KavachAI Trigger Engine — Unified API Pollers
 ================================================
 Three async httpx pollers that fetch live environmental data
 for parametric trigger evaluation.
@@ -393,7 +393,7 @@ class WeatherAPIAlertsPoller:
 
     @staticmethod
     def _classify_alert_event(desc_lower: str) -> str:
-        """Classify alert into GigShield event types."""
+        """Classify alert into KavachAI event types."""
         if any(kw in desc_lower for kw in ["cyclone", "cyclonic", "hurricane", "typhoon"]):
             return "cyclone"
         elif any(kw in desc_lower for kw in ["flood", "flash flood", "deluge"]):

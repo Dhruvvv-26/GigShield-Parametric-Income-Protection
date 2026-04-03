@@ -1,5 +1,5 @@
 """
-GigShield ML Service — FastAPI Application
+KavachAI ML Service — FastAPI Application
 =============================================
 Port 8006. Serves premium pricing, fraud scoring, and disruption prediction.
 Loads trained models at startup; falls back to rule-based if models missing.
@@ -69,7 +69,7 @@ def load_models():
 
             meta = models["lstm_meta"]
 
-            class GigShieldLSTM(nn.Module):
+            class KavachAILSTM(nn.Module):
                 def __init__(self, input_size=9, hidden_size=64, num_layers=2, dropout=0.2):
                     super().__init__()
                     self.lstm = nn.LSTM(input_size=input_size, hidden_size=hidden_size,
@@ -89,7 +89,7 @@ def load_models():
                     out = self.fc2(out)
                     return self.sigmoid(out).squeeze(-1)
 
-            model = GigShieldLSTM(
+            model = KavachAILSTM(
                 input_size=meta.get("input_size", 9),
                 hidden_size=meta.get("hidden_size", 64),
                 num_layers=meta.get("num_layers", 2),
@@ -115,7 +115,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="GigShield ML Service",
+    title="KavachAI ML Service",
     version="1.0.0",
     description="Premium pricing, fraud scoring, and disruption prediction",
     lifespan=lifespan,

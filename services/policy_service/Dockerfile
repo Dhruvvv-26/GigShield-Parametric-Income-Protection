@@ -1,4 +1,4 @@
-# GigShield — Policy Service
+# KavachAI — Policy Service
 # Build context: repo root (.)
 FROM python:3.11-slim AS base
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PYTHONPATH=/app:/app/shared
@@ -11,12 +11,12 @@ COPY ./services/policy_service/requirements.txt .
 RUN pip install --no-cache-dir --user -r requirements.txt
 
 FROM base AS production
-COPY --from=builder /root/.local /home/gigshield/.local
-ENV PATH=/home/gigshield/.local/bin:$PATH
+COPY --from=builder /root/.local /home/kavachai/.local
+ENV PATH=/home/kavachai/.local/bin:$PATH
 COPY ./services/policy_service /app/
 COPY ./shared /app/shared/
-RUN useradd -m -u 1001 gigshield && chown -R gigshield:gigshield /app
-USER gigshield
+RUN useradd -m -u 1001 kavachai && chown -R kavachai:kavachai /app
+USER kavachai
 EXPOSE 8002
 HEALTHCHECK --interval=15s --timeout=5s --start-period=20s --retries=5 \
     CMD curl -sf http://localhost:8002/health || exit 1

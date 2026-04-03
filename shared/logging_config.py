@@ -1,5 +1,5 @@
 """
-GigShield — Structured Logging
+KavachAI — Structured Logging
 JSON-formatted logs with request_id, service_name, and correlation IDs.
 Used by all services.
 """

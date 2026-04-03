@@ -1,5 +1,5 @@
 """
-GigShield — Shared Database Module
+KavachAI — Shared Database Module
 Async SQLAlchemy engine + session factory.
 All services import get_db() as a FastAPI dependency.
 """

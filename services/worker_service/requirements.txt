@@ -1,4 +1,4 @@
-# GigShield — Worker Service Dependencies
+# KavachAI — Worker Service Dependencies
 # Python 3.11+
 
 # ── Web Framework ─────────────────────────────────────────────────────────────

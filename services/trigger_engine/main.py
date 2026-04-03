@@ -1,5 +1,5 @@
 """
-GigShield — Trigger Engine
+KavachAI — Trigger Engine
 Responsibility:
   - Poll OpenWeatherMap every 15 minutes
   - Poll CPCB AQI every 60 minutes
@@ -24,7 +24,7 @@ from prometheus_client import Counter, Gauge, make_asgi_app
 from shared.config import get_settings
 from shared.database import close_db, init_db
 from shared.logging_config import configure_logging, get_logger
-from shared.messaging import GigShieldProducer
+from shared.messaging import KavachAIProducer
 from shared.redis_client import close_redis, init_redis
 
 from schedulers.owm_poller import OpenWeatherMapPoller
@@ -62,7 +62,7 @@ LAST_POLL_TIMESTAMP = Gauge(
 
 # ── Global Producer ───────────────────────────────────────────────────────────
 # Shared across all pollers — single producer instance per service
-producer = GigShieldProducer()
+producer = KavachAIProducer()
 
 
 @asynccontextmanager
@@ -134,7 +134,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="GigShield Trigger Engine",
+    title="KavachAI Trigger Engine",
     description="Parametric trigger detection: OWM + CPCB + NDMA → Redpanda",
     version="1.0.0",
     docs_url="/docs" if settings.env == "development" else None,

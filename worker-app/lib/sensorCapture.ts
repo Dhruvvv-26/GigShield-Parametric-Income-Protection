@@ -1,5 +1,5 @@
 /**
- * GigShield Worker App — Sensor Capture SDK
+ * KavachAI Worker App — Sensor Capture SDK
  *
  * Background sensor capture for fraud scoring:
  * - GPS pings (5 pings over 30 seconds)

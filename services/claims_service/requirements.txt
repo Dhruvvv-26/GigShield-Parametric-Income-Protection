@@ -1,4 +1,4 @@
-# GigShield — Claims Service Dependencies
+# KavachAI — Claims Service Dependencies
 # Python 3.11+
 
 # ── Web Framework ─────────────────────────────────────────────────────────────

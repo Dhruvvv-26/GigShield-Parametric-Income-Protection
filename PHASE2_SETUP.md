@@ -1,4 +1,4 @@
-# GigShield — Phase 2 Local Setup
+# KavachAI — Phase 2 Local Setup
 
 ## Prerequisites
 - Docker + Docker Compose installed
@@ -8,7 +8,7 @@
 
 ```bash
 # 1. Clone / navigate to project root
-cd gigshield/
+cd kavachai/
 
 # 2. Copy environment file and add your OWM key (optional)
 cp .env.example .env
@@ -101,7 +101,7 @@ docker compose logs -f claims-service
 docker compose logs -f payment-service
 
 # View Redpanda topics
-docker exec gigshield-redpanda rpk topic list
+docker exec kavachai-redpanda rpk topic list
 
 # Stop everything
 docker compose down

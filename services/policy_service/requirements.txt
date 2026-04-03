@@ -1,4 +1,4 @@
-# GigShield — Policy Service Dependencies
+# KavachAI — Policy Service Dependencies
 fastapi==0.109.0
 uvicorn[standard]==0.27.0
 sqlalchemy[asyncio]==2.0.25

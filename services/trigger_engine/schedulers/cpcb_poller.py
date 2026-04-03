@@ -12,7 +12,7 @@ import httpx
 
 from shared.config import get_settings
 from shared.database import get_db_context
-from shared.messaging import GigShieldProducer
+from shared.messaging import KavachAIProducer
 from shared.redis_client import cache_get, cache_set
 
 from integrations.threshold_evaluator import ThresholdEvaluator
@@ -62,7 +62,7 @@ class CPCBPoller:
         "tier3": 1,   # Tier 3 (AQI>500) — immediate trigger
     }
 
-    def __init__(self, producer: GigShieldProducer):
+    def __init__(self, producer: KavachAIProducer):
         self.producer = producer
         self.evaluator = ThresholdEvaluator()
         self.zone_resolver = ZoneResolver()

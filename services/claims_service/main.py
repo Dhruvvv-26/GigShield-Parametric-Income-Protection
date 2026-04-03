@@ -1,5 +1,5 @@
 """
-GigShield — Claims Service
+KavachAI — Claims Service
 Responsibility:
   - Consume trigger events from Redpanda (processed.trigger.events)
   - Create claims for all active policies in affected zones
@@ -20,7 +20,7 @@ from prometheus_client import Counter, Gauge, make_asgi_app
 from shared.config import get_settings
 from shared.database import close_db, init_db
 from shared.logging_config import configure_logging, get_logger
-from shared.messaging import GigShieldProducer
+from shared.messaging import KavachAIProducer
 from shared.redis_client import close_redis, init_redis
 
 from consumers.trigger_consumer import TriggerEventConsumer
@@ -48,7 +48,7 @@ ACTIVE_CLAIMS = Gauge(
 )
 
 # ── Global Producer ───────────────────────────────────────────────────────────
-producer = GigShieldProducer()
+producer = KavachAIProducer()
 consumer: TriggerEventConsumer | None = None
 consumer_task: asyncio.Task | None = None
 
@@ -87,7 +87,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="GigShield Claims Service",
+    title="KavachAI Claims Service",
     description="Parametric insurance claims: auto-creation, fraud scoring, payout routing",
     version="2.0.0",
     docs_url="/docs" if settings.env == "development" else None,

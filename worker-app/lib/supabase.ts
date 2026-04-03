@@ -1,5 +1,5 @@
 /**
- * GigShield — Supabase Client
+ * KavachAI — Supabase Client
  *
  * Initializes the Supabase JS client for authentication and data access.
  * Uses AsyncStorage for persistent session management in React Native.

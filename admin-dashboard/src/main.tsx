@@ -15,7 +15,7 @@ function App() {
         <nav className="sidebar">
           <div className="logo">
             <span className="logo-icon">🛡️</span>
-            <h1>GigShield</h1>
+            <h1>KavachAI</h1>
             <span className="logo-sub">Admin</span>
           </div>
           <div className="nav-links">

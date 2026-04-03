@@ -23,7 +23,7 @@ from models.claim import Claim, Policy, TriggerEvent, Worker, Zone
 from services.fraud_engine import FraudScoringEngine
 from shared.config import get_settings
 from shared.database import get_db_context
-from shared.messaging import GigShieldConsumer, GigShieldProducer
+from shared.messaging import KavachAIConsumer, KavachAIProducer
 from shared.redis_client import get_redis
 
 logger = logging.getLogger(__name__)
@@ -31,13 +31,13 @@ settings = get_settings()
 fraud_engine = FraudScoringEngine()
 
 
-class TriggerEventConsumer(GigShieldConsumer):
+class TriggerEventConsumer(KavachAIConsumer):
     """
     Consumes trigger events from Redpanda and creates claims for all
     active policies in the affected zone.
     """
 
-    def __init__(self, producer: GigShieldProducer):
+    def __init__(self, producer: KavachAIProducer):
         super().__init__(
             topics=[settings.topic_processed_trigger_events],
             group_id="claims_consumer",

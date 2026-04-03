@@ -1,5 +1,5 @@
 /**
- * GigShield Worker App — Payout History Screen
+ * KavachAI Worker App — Payout History Screen
  *
  * Chronological list of all claims/payouts with:
  * - Trigger type icon
@@ -93,7 +93,7 @@ export default function PayoutsScreen() {
           <View style={styles.summaryItem}>
             <Text style={styles.summaryValue}>
               ₹{payoutItems?.reduce((sum: number, p: any) =>
-                sum + ((p?.paymentStatus === 'completed' || p?.paymentStatus === 'auto_approved') ? (p?.payout_amount || 0) : 0), 0).toFixed(0)}
+                sum + ((p?.paymentStatus === 'completed' || p?.paymentStatus === 'auto_approved') ? Number(p?.payout_amount || 0) : 0), 0).toFixed(0)}
             </Text>
             <Text style={styles.summaryLabel}>Total Credited</Text>
           </View>

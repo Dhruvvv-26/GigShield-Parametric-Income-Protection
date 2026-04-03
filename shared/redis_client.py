@@ -1,5 +1,5 @@
 """
-GigShield — Shared Redis Client
+KavachAI — Shared Redis Client
 Used for: premium caching, fraud scores, session tokens,
 deduplication locks, rate limiting counters.
 """

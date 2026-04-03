@@ -1,5 +1,5 @@
 """
-GigShield — Shared Redpanda / Kafka Messaging
+KavachAI — Shared Redpanda / Kafka Messaging
 Producer: used by Trigger Engine to emit events.
 Consumer base: used by Claims Service (Week 4).
 
@@ -28,7 +28,7 @@ def build_message(
     source_service: str,
 ) -> dict[str, Any]:
     """
-    Standard GigShield message envelope.
+    Standard KavachAI message envelope.
     Every message published to Redpanda uses this schema.
     """
     return {
@@ -43,7 +43,7 @@ def build_message(
 
 # ── Producer ──────────────────────────────────────────────────────────────────
 
-class GigShieldProducer:
+class KavachAIProducer:
     """
     Async Kafka producer backed by Redpanda.
     Instantiate once at service startup, call close() at shutdown.
@@ -107,7 +107,7 @@ class GigShieldProducer:
 
 # ── Consumer Base ─────────────────────────────────────────────────────────────
 
-class GigShieldConsumer:
+class KavachAIConsumer:
     """
     Async Kafka consumer base class.
     Subclass and implement process_message() for each consumer.

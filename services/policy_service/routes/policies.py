@@ -71,7 +71,7 @@ async def _policy_to_response(policy: Policy, db) -> PolicyResponse:
     status_code=status.HTTP_201_CREATED,
     summary="Create a new weekly policy",
     description="""
-    Creates a GigShield parametric insurance policy for a Q-Commerce rider.
+    Creates a KavachAI parametric insurance policy for a Q-Commerce rider.
 
     Flow:
     1. Fetch worker profile from Worker Service

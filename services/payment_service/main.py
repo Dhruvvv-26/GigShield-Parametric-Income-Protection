@@ -1,5 +1,5 @@
 """
-GigShield — Payment Service
+KavachAI — Payment Service
 Responsibility:
   - Consume approved/soft_hold claims from Redpanda
   - Create Razorpay UPI payouts (test mode)
@@ -22,7 +22,7 @@ from prometheus_client import Counter, Gauge, Histogram, make_asgi_app
 from shared.config import get_settings
 from shared.database import close_db, init_db
 from shared.logging_config import configure_logging, get_logger
-from shared.messaging import GigShieldProducer
+from shared.messaging import KavachAIProducer
 from shared.redis_client import close_redis, init_redis
 
 from consumers.claims_consumer import ClaimsPaymentConsumer
@@ -46,7 +46,7 @@ LOSS_RATIO = Gauge(
 )
 
 # ── Global Producer ───────────────────────────────────────────────────────────
-producer = GigShieldProducer()
+producer = KavachAIProducer()
 consumer: ClaimsPaymentConsumer | None = None
 consumer_task: asyncio.Task | None = None
 
@@ -84,7 +84,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="GigShield Payment Service",
+    title="KavachAI Payment Service",
     description="Razorpay UPI payouts, financial controls, loss ratio analytics",
     version="2.0.0",
     docs_url="/docs" if settings.env == "development" else None,

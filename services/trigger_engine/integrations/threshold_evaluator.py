@@ -1,6 +1,6 @@
 """
 Trigger Engine — Threshold Evaluator
-Single source of truth for all GigShield parametric trigger rules.
+Single source of truth for all KavachAI parametric trigger rules.
 Used by all pollers (OWM, CPCB, NDMA).
 """
 from shared.config import get_settings
@@ -10,7 +10,7 @@ settings = get_settings()
 
 class ThresholdEvaluator:
     """
-    Evaluates raw metric values against GigShield parametric trigger thresholds.
+    Evaluates raw metric values against KavachAI parametric trigger thresholds.
     Returns whether a threshold is breached, the tier, and the payout amount.
 
     All thresholds are configured in shared/config.py for easy adjustment.

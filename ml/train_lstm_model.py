@@ -1,5 +1,5 @@
 """
-GigShield ML — PyTorch LSTM Disruption Prediction
+KavachAI ML — PyTorch LSTM Disruption Prediction
 ====================================================
 Trains a 2-layer LSTM on 3 years × 6 cities × 20 zones of synthetic
 daily weather/trigger sequences to predict P(trigger in next 7 days).
@@ -205,7 +205,7 @@ def create_sequences(
 
 def train():
     print("=" * 70)
-    print("GigShield Disruption Prediction — PyTorch LSTM Training")
+    print("KavachAI Disruption Prediction — PyTorch LSTM Training")
     print("=" * 70)
 
     # ── Import PyTorch ────────────────────────────────────────────────────────
@@ -275,7 +275,7 @@ def train():
     print(f"  → Train: {len(train_idx):,}, Val: {len(val_idx):,}, Test: {len(test_idx):,}")
 
     # ── LSTM Model ────────────────────────────────────────────────────────────
-    class GigShieldLSTM(nn.Module):
+    class KavachAILSTM(nn.Module):
         def __init__(self, input_size=9, hidden_size=64, num_layers=2, dropout=0.2):
             super().__init__()
             self.lstm = nn.LSTM(
@@ -303,7 +303,7 @@ def train():
     # ── Training loop ─────────────────────────────────────────────────────────
     print("\n[4/6] Training LSTM (2 layers, 64 hidden, Adam lr=0.001)...")
 
-    model = GigShieldLSTM(input_size=n_features)
+    model = KavachAILSTM(input_size=n_features)
     criterion = nn.BCELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=5, factor=0.5)

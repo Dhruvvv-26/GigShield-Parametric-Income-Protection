@@ -1,5 +1,5 @@
 """
-GigShield Notification Service — OneSignal Push Notifications
+KavachAI Notification Service — OneSignal Push Notifications
 ==============================================================
 Sends instant push notifications to gig riders when:
   1. A parametric trigger fires in their zone
@@ -214,7 +214,7 @@ async def _send_notification(
         "headings": {"en": heading},
         "contents": {"en": content},
         "data": data or {},
-        "android_accent_color": "FF00C9B1",  # GigShield teal
+        "android_accent_color": "FF00C9B1",  # KavachAI teal
         "small_icon": "ic_notification",
         "priority": 10,
     }
@@ -237,7 +237,7 @@ async def _send_notification_bulk(
         return {"status": "skipped", "reason": "ONESIGNAL credentials not set"}
 
     # OneSignal limit: 2,000 player_ids per request
-    # For GigShield's ~1,000 riders per city, single batch is fine
+    # For KavachAI's ~1,000 riders per city, single batch is fine
     payload = {
         "app_id": ONESIGNAL_APP_ID,
         "include_player_ids": player_ids[:2000],
