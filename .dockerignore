@@ -46,3 +46,20 @@ monitoring
 *.log
 tmp
 .dockerignore
+
+# Python virtual environments
+.venv
+venv
+
+# Prototype / legacy code (not needed in containers)
+Prototype
+
+# Admin dashboard (separate build)
+admin-dashboard
+
+# Large binary files
+*.pdf
+*.pptx
+
+# Assets (images not needed in backend containers)
+assets

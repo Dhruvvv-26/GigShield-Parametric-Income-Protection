@@ -11,7 +11,7 @@ networks:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.20.0.0/16
+        - subnet: 172.30.0.0/16
 
 volumes:
   postgres-data:
@@ -49,7 +49,7 @@ services:
   postgres:
     <<: *service-defaults
     image: postgis/postgis:15-3.3-alpine
-    container_name: kavachai-postgres
+    container_name: postgres
     environment:
       POSTGRES_DB: kavachai
       POSTGRES_USER: kavachai
@@ -70,7 +70,7 @@ services:
   redis:
     <<: *service-defaults
     image: redis:7-alpine
-    container_name: kavachai-redis
+    container_name: redis
     command: >
       redis-server
       --requirepass ${REDIS_PASSWORD:-redis_secure_2026}
@@ -90,7 +90,7 @@ services:
   redpanda:
     <<: *service-defaults
     image: redpandadata/redpanda:v23.3.5
-    container_name: kavachai-redpanda
+    container_name: redpanda
     command:
       - redpanda
       - start
@@ -120,7 +120,7 @@ services:
   redpanda-init:
     <<: *service-defaults
     image: redpandadata/redpanda:v23.3.5
-    container_name: kavachai-redpanda-init
+    container_name: redpanda-init
     restart: "no"
     entrypoint: /bin/bash
     command: >
@@ -149,7 +149,7 @@ services:
       context: .
       dockerfile: ./services/worker_service/Dockerfile
       target: production
-    container_name: kavachai-worker-service
+    container_name: worker-service
     environment:
       <<: *common-env
       SERVICE_NAME: worker-service
@@ -174,7 +174,7 @@ services:
       context: .
       dockerfile: ./services/policy_service/Dockerfile
       target: production
-    container_name: kavachai-policy-service
+    container_name: policy-service
     environment:
       <<: *common-env
       SERVICE_NAME: policy-service
@@ -202,7 +202,7 @@ services:
       context: .
       dockerfile: ./services/trigger_engine/Dockerfile
       target: production
-    container_name: kavachai-trigger-engine
+    container_name: trigger-engine
     environment:
       <<: *common-env
       SERVICE_NAME: trigger-engine
@@ -237,7 +237,7 @@ services:
       context: .
       dockerfile: ./services/claims_service/Dockerfile
       target: production
-    container_name: kavachai-claims-service
+    container_name: claims-service
     environment:
       <<: *common-env
       SERVICE_NAME: claims-service
@@ -266,7 +266,7 @@ services:
       context: .
       dockerfile: ./services/payment_service/Dockerfile
       target: production
-    container_name: kavachai-payment-service
+    container_name: payment-service
     environment:
       <<: *common-env
       SERVICE_NAME: payment-service
@@ -302,7 +302,7 @@ services:
       context: .
       dockerfile: ./services/ml_service/Dockerfile
       target: production
-    container_name: kavachai-ml-service
+    container_name: ml-service
     environment:
       <<: *common-env
       SERVICE_NAME: ml-service

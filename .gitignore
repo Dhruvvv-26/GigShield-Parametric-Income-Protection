@@ -1,6 +1,44 @@
+# ── Secrets & Environment ─────────────────────────────────
+.env
+.env.local
+.env.*.local
+worker-app/.env
+
+# ── Firebase / Service Accounts ────────────────────────────
 firebase_service_account.json
+**/firebase_service_account*.json
+*service-account*.json
+
+# ── Python ─────────────────────────────────────────────────
 .venv/
 venv/
 __pycache__/
 *.pyc
-.env
+*.pyo
+*.egg-info/
+dist/
+build/
+*.whl
+
+# ── Node / Expo ────────────────────────────────────────────
+node_modules/
+worker-app/node_modules/
+admin-dashboard/node_modules/
+.expo/
+*.tsbuildinfo
+
+# ── Docker ─────────────────────────────────────────────────
+*.log
+docker-compose.override.yml
+
+# ── OS ─────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# ── IDE ────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.code-workspace
