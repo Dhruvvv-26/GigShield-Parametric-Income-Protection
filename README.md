@@ -5,7 +5,7 @@
   <img src="https://img.shields.io/badge/Crisis%20Response-Market%20Crash%20Addressed-red?style=for-the-badge"/>
 </p>
 
-<h1 align="center">⚡ KavachAI</h1>
+<h1 align="center">⚡ GigShield</h1>
 <h3 align="center">Parametric Income Protection for India's Q-Commerce Delivery Riders</h3>
 
 <p align="center"><em>Automatic. Instant. Zero Claims. And now — fully functional, zero-cost, ML-powered.</em></p>
@@ -66,7 +66,7 @@ He is not a food delivery rider. He is not an Amazon driver. He is a **quick-com
 
 3. **Weekly income, weekly expenses.** Arjun earns ~₹8,000/week. He spends ~₹7,500/week on rent, food, fuel, and loan repayments. He cannot lock ₹400 into a monthly premium and wait for a disruption. He needs a weekly product. There is no weekly income-loss insurance product in India.
 
-4. **No product exists at all.** KavachAI did a market scan. No Indian insurer — HDFC ERGO, Bajaj Allianz, New India Assurance, or any InsurTech — currently offers a product that covers environmental income loss for platform-based gig workers. The category does not exist.
+4. **No product exists at all.** GigShield did a market scan. No Indian insurer — HDFC ERGO, Bajaj Allianz, New India Assurance, or any InsurTech — currently offers a product that covers environmental income loss for platform-based gig workers. The category does not exist.
 
 ### Our user is not just Arjun. He is 3.5 lakh riders.
 
@@ -119,7 +119,7 @@ Event → Claim Filed → Documentation → Investigation → Assessment → Set
                                                                     ↑
                                                               30–90 days
 
-KavachAI Parametric:
+GigShield Parametric:
 Event → Threshold Breached → External API Confirms → AI Fraud Check → Payout
                                                                         ↑
                                                                    < 30 minutes
@@ -130,13 +130,13 @@ This model is already established and proven at scale:
 - **Aviation:** AXA's flight delay insurance triggers automatically on 3-hour delays
 - **Disaster:** Swiss Re's Caribbean Catastrophe Risk Insurance triggers on wind speed readings
 
-KavachAI applies this to **Q-Commerce worker income** — the first such product in India, calibrated to dark store zone level (2 km radius) rather than district or city level.
+GigShield applies this to **Q-Commerce worker income** — the first such product in India, calibrated to dark store zone level (2 km radius) rather than district or city level.
 
-### The KavachAI promise to Arjun
+### The GigShield promise to Arjun
 
 When Delhi AQI hits 450 and stays there for 4 hours:
 - Arjun does **nothing**.
-- KavachAI's system detects the breach.
+- GigShield's system detects the breach.
 - AI fraud check runs in under 60 seconds.
 - ₹300–₹500 is transferred to Arjun's UPI within 30 minutes.
 - He receives a push notification: *"Disruption detected in your zone. ₹350 credited."*
@@ -148,7 +148,7 @@ When Delhi AQI hits 450 and stays there for 4 hours:
 
 > **This section answers the judge question directly: How does your AI actually work?** Not "we use XGBoost" — but what does XGBoost actually do in this system, on what data, producing what output, and how does that output affect what Arjun pays or receives?
 
-KavachAI has three AI components. Each one is described precisely below.
+GigShield has three AI components. Each one is described precisely below.
 
 ---
 
@@ -251,15 +251,15 @@ PyTorch LSTM (Long Short-Term Memory) — appropriate for sequential time-series
 
 A system that checks only "Is this worker's GPS inside the affected zone?" has one decision point. A mock GPS app defeats it in under 30 seconds. Every other check passes — the event is real, the policy is active, the zone matches — because the only lie is the coordinate.
 
-### KavachAI's response: Five independent signal layers
+### GigShield's response: Five independent signal layers
 
-KavachAI's adversarial defense cross-examines every GPS claim against **five signal sources that cannot all be simultaneously falsified** without detection equipment that costs more than any parametric payout.
+GigShield's adversarial defense cross-examines every GPS claim against **five signal sources that cannot all be simultaneously falsified** without detection equipment that costs more than any parametric payout.
 
 ---
 
 #### Signal Layer 5: The Zero-Trust Liveness Lock (The Bouncer)
 
-**The Crown Jewel of KavachAI's defense architecture.** We implement a strict "Bouncer vs. Detective" topology.
+**The Crown Jewel of GigShield's defense architecture.** We implement a strict "Bouncer vs. Detective" topology.
 
 **The Bouncer (Deterministic Pre-Filters):**
 Before any ML operates, the React Native app forces a live, geo-stamped, highly compressed selfie via the `GPSCamera` component. The FastAPI backend enforces a strict **5-minute Time Lock** and uses PostGIS `ST_Within` to ensure the hardware GPS is physically inside the assigned `primary_zone_id` polygon. If this deterministic check fails, the claim is instantly rejected (HTTP 403 Forbidden). 
@@ -305,7 +305,7 @@ The RMS difference is not subtle. It is approximately 8×. No app can fake accel
 Real navigation produces gyroscope yaw rate changes at intersections that correlate with GPS heading changes. A mock GPS app moving coordinates along a mapped road cannot simultaneously generate matching gyroscope turns on a stationary device. Heading-yaw mismatch > 15° at intersection nodes → fraud signal.
 
 **Mock Location API gate (hard stop):**
-Android exposes `Settings.Secure.ALLOW_MOCK_LOCATION` (API 17) and `Build.IS_DEBUGGABLE`. KavachAI's React Native SDK checks both at every claim initiation via the `ExpoSensors` package. Mock GPS enabled → claim immediately held. No score calculation. No payout. Worker is notified to disable developer mode and resubmit if legitimate.
+Android exposes `Settings.Secure.ALLOW_MOCK_LOCATION` (API 17) and `Build.IS_DEBUGGABLE`. GigShield's React Native SDK checks both at every claim initiation via the `ExpoSensors` package. Mock GPS enabled → claim immediately held. No score calculation. No payout. Worker is notified to disable developer mode and resubmit if legitimate.
 
 ---
 
@@ -314,7 +314,7 @@ Android exposes `Settings.Secure.ALLOW_MOCK_LOCATION` (API 17) and `Build.IS_DEB
 The device's IP address is physically independent of the GPS module. A rider cannot simultaneously have their GPS at a flooded underpass in Rohini and their mobile carrier IP routing through a cell tower 8km away in Pitampura.
 
 **Implementation:**
-KavachAI calls `ip-api.com` (1,000 free calls/day) at claim time to resolve the carrier IP to a geographic coordinate. Cross-reference with the claimed GPS coordinate.
+GigShield calls `ip-api.com` (1,000 free calls/day) at claim time to resolve the carrier IP to a geographic coordinate. Cross-reference with the claimed GPS coordinate.
 
 - Delta < 2km → clean (carrier tower near the claimed zone)
 - Delta 2–4km → elevated (flag for monitoring, does not block)
@@ -328,7 +328,7 @@ React Native's `NetInfo` module captures carrier network identifiers over the cl
 #### Signal Layer 4: Behavioral & Temporal Pattern Analysis
 
 **Pre-event zone residency requirement:**
-KavachAI requires GPS pings every 5 minutes while a policy is active. A legitimate rider in the Rohini zone was there before the AQI trigger fired. A syndicate member opens the app after seeing the Telegram alert and starts spoofing.
+GigShield requires GPS pings every 5 minutes while a policy is active. A legitimate rider in the Rohini zone was there before the AQI trigger fired. A syndicate member opens the app after seeing the Telegram alert and starts spoofing.
 
 Check: Was the worker's GPS inside the claim zone at **T−30 minutes** before the trigger event? If not, the claim is a sudden appearance coinciding with a payout opportunity.
 
@@ -380,7 +380,7 @@ A genuine Zepto cyclist in Andheri West whose ₹8,000 Android phone loses GPS s
 | 0.85–1.00 | 🚫 Critical | Full block. Admin review required. Account flagged. |
 
 **Network Drop Grace Period:**
-If GPS pings stop during an active disruption event AND the last recorded ping was inside the claim zone, KavachAI holds the fraud score constant — does not escalate — for **45 minutes**. A cyclist whose phone drops signal in a flooded zone is never penalized for the exact condition being insured against.
+If GPS pings stop during an active disruption event AND the last recorded ping was inside the claim zone, GigShield holds the fraud score constant — does not escalate — for **45 minutes**. A cyclist whose phone drops signal in a flooded zone is never penalized for the exact condition being insured against.
 
 ---
 
@@ -692,7 +692,7 @@ This is financially viable from the first 1,000 riders. Scale to 10,000 riders a
 
 ## 11. Working Prototype
 
-**File:** `Prototype/KavachAI_Prototype.html`
+**File:** `Prototype/GigShield_Prototype.html`
 
 Open directly in any modern browser — zero server, zero dependencies, zero install.
 
@@ -713,7 +713,7 @@ Open directly in any modern browser — zero server, zero dependencies, zero ins
 |---|---|---|
 | Worker App | React Native + Expo Go | Rider-facing app with zero-trust liveness, geo-stamped selfies, and sensor capture |
 | Admin Dashboard | React + Vite + Leaflet + CartoDB | Dark Matter maps for real-time fraud queue, SHAP charts, and zone routing |
-| Backend | Python FastAPI | 11 async microservices with strict Pydantic memory controls |
+| Backend | Python FastAPI | 6 async microservices with strict Pydantic memory controls |
 | Premium ML | XGBoost + LightGBM ensemble | Personalized weekly premium pricing (R² > 0.97 validation) |
 | Fraud Engine | Isolation Forest + GradientBoosting | Real-time classification detecting anomalies and spoofing (AUC > 0.99 validation) |
 | Prediction ML | PyTorch LSTM | 7-day disruption probability forecast (Test AUC 1.0) |
@@ -734,14 +734,14 @@ Open directly in any modern browser — zero server, zero dependencies, zero ins
 ## 13. File Structure & Component Overview
 
 ```text
-KavachAI/
+GigShield/
 ├── admin-dashboard/       # React/Vite dashboard for admins to view live fraud queues, SHAP charts, and zone maps
 ├── api_gateway/           # Nginx reverse proxy routing external requests to the correct internal FastAPI service
 ├── migrations/            # SQL scripts to initialize PostGIS zones and system schema in PostgreSQL
 ├── ml/                    # Offline training scripts for the XGBoost premium, LSTM trigger, and GradientBoosting fraud models
 ├── monitoring/            # Prometheus config to scrape and record metrics from across the microservice cluster
 ├── scripts/               # "God Mode" demo scripts and test utilities for simulating E2E events and seeding data
-├── services/              # Core backend: 7 independent FastAPI microservices
+├── services/              # Core backend: 6 independent FastAPI microservices
 │   ├── claims_service/    # Processes payouts, enforces the Bouncer protocol, and interfaces with the ML Scorer
 │   ├── ml_service/        # Serves real-time inference (fraud, premium, LSTM) heavily cached in Redis
 │   ├── notification_.../  # Listens to Redpanda topics and dispatches FCM push alerts to riders instantly
@@ -751,7 +751,7 @@ KavachAI/
 │   └── worker_service/    # Handles rider registration, GPS zone clustering assignments, and live location pings
 ├── shared/                # Common Python utilities for database mapping, Redis connects, and Redpanda messaging
 ├── worker-app/            # The React Native + Expo rider application featuring "Zero-Trust" GPS/sensor verification
-└── docker-compose.yml     # Orchestrates the 11+ microcontainers (PostgreSQL, Redpanda, Redis, FastAPI, etc.)
+└── docker-compose.yml     # Orchestrates the 12 containers (PostgreSQL, Redpanda, Redis, FastAPI, etc.)
 ```
 
 ---
@@ -773,7 +773,7 @@ KavachAI/
 - **YT Unlisted video submission link:** [https://youtu.be/SvxXVfBaTIo](https://youtu.be/SvxXVfBaTIo)
 - **Drive Link of the video:** [Google Drive Video Link](https://drive.google.com/file/d/11p0Qzj3ejJncH5XmLfBNeYFsZHFOMOC2/view?usp=sharing)
 - **Drive link of the submission Folder:** [Google Drive Folder Link](https://drive.google.com/drive/folders/1SG2l1yzUukmBRNj9vXgMjR7wZiv5MTma?usp=sharing)
-- **GitHub Repository:** [https://github.com/Dhruvvv-26/KavachAI-Parametric-Income-Protection.git](https://github.com/Dhruvvv-26/KavachAI-Parametric-Income-Protection.git)
+- **GitHub Repository:** [https://github.com/Dhruvvv-26/GigShield-Parametric-Income-Protection.git](https://github.com/Dhruvvv-26/GigShield-Parametric-Income-Protection.git)
 
 ---
 
@@ -785,7 +785,7 @@ KavachAI/
 - [x] **Market Crash addressed** — Section 5 answers with five-layer adversarial defense, specific detection mechanism per layer, ML ensemble, and graduated UX response
 - [x] **BEFORE draw.io architecture** — Section 6, importable XML showing the single-GPS vulnerability
 - [x] **AFTER draw.io architecture** — Section 7, importable XML showing the hardened 5-layer defense + full microservices
-- [x] **Working prototype** — `prototype/KavachAI_working_prototype.html`
+- [x] **Working prototype** — `prototype/GigShield_working_prototype.html`
 - [x] **FINAL scope respected** — Fully functional implementation, no fake code, real validation metrics
 - [x] 2-minute pitch video — due March 20, 11:59 PM
 
