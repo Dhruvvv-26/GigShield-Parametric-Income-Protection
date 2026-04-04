@@ -688,7 +688,7 @@ python3 scripts/demo_script.py
 ✅ CHECK 1 PASSED — Clean claim auto-approved in 4.2s
 ✅ CHECK 2 PASSED — Suspicious claim soft-held, partial payout in 5.1s
 ✅ CHECK 3 PASSED — GPS spoofing detected and blocked in 3.8s
-🎯 KavachAI 5-Star Demo: All checks passed in 13.1s
+🎯 KavachAI Demo: All checks passed in 13.1s
 ```
 
 ### Manual narration sequence (for video recording)
@@ -809,7 +809,7 @@ Demonstrates: rider registration with zone and vehicle selection, live rule-base
 
 ---
 
-## 14. Tech Stack — 100% Free, All Verified
+## 14. Tech Stack 
 
 | Category | Technology | Phase 2 Status |
 |---|---|---|
