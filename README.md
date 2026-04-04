@@ -522,7 +522,11 @@ cd KavachAI
 cp .env.example .env
 ```
 
-The `.env.example` file includes all free-tier API keys and default values. For a local evaluation, the backend's fail-closed fallback mechanisms handle any rate-limit edge cases gracefully. Open `.env` to verify DB passwords and broker URLs match localhost defaults.
+To securely evaluate the platform with our active API limits and production accounts, please download the required `.env` files from this **[Google Drive Folder](https://drive.google.com/drive/folders/11GOPV4GXGVU-OUgfGVSNTWUiPq_8c8MS?usp=drive_link)** instead of using the `.example` files.
+
+> 🔐 **How to apply the Judge Secrets:**
+> 1. Download `backend_env_secrets.txt` and rename it to `.env` in the root folder (i.e. `KavachAI/.env`).
+> 2. Download `worker_app_env_secrets.txt` and rename it to `.env` inside the frontend folder (i.e. `KavachAI/worker-app/.env`).
 
 > 📱 **Running the React Native Worker App (Physical Device)**
 > If you want to evaluate the full end-to-end mobile experience (Expo, background sensor payloads, Firebase notifications), please follow our dedicated **[Worker App Demo Guide](WORKER_APP_DEMO.md)**. It walks you through matching your LAN IPs and running the `worker-app` natively so that you can follow along with simulated payouts on your own phone.
