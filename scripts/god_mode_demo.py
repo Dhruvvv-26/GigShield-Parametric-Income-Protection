@@ -109,13 +109,13 @@ def cmd_status(args):
             p_count = cur.fetchone()[0]
             cur.execute("SELECT COUNT(*) FROM claims")
             c_count = cur.fetchone()[0]
-            cur.execute("SELECT COUNT(*) FROM claims WHERE status = 'approved'")
+            cur.execute("SELECT COUNT(*) FROM claims WHERE status = 'auto_approved'")
             c_app = cur.fetchone()[0]
             cur.execute("SELECT COUNT(*) FROM claims WHERE status = 'soft_hold'")
             c_sh = cur.fetchone()[0]
             cur.execute("SELECT COUNT(*) FROM claims WHERE status = 'blocked'")
             c_blk = cur.fetchone()[0]
-            cur.execute("SELECT COUNT(*) FROM payments WHERE status = 'success'")
+            cur.execute("SELECT COUNT(*) FROM payments WHERE status = 'completed'")
             pay_count = cur.fetchone()[0]
             
             print(f"  workers:         {w_count} registered")
@@ -126,10 +126,10 @@ def cmd_status(args):
             cur.execute("SELECT kyc_status FROM workers WHERE id = %s", (DEMO_WORKER_ID,))
             rider = cur.fetchone()
             if rider:
-                cur.execute("SELECT status, tier, ends_at FROM policies WHERE worker_id = %s AND status = 'active'", (DEMO_WORKER_ID,))
+                cur.execute("SELECT status, coverage_tier, coverage_end FROM policies WHERE worker_id = %s AND status = 'active'", (DEMO_WORKER_ID,))
                 pol = cur.fetchone()
                 
-                cur.execute("SELECT COUNT(*), SUM(payout_amount) FROM claims WHERE worker_id = %s AND created_at >= current_date AND status = 'approved'", (DEMO_WORKER_ID,))
+                cur.execute("SELECT COUNT(*), SUM(payout_amount) FROM claims WHERE worker_id = %s AND created_at >= current_date AND status = 'auto_approved'", (DEMO_WORKER_ID,))
                 stats = cur.fetchone()
                 claims_today = stats[0] or 0
                 payouts = stats[1] or 0.0

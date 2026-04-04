@@ -54,7 +54,22 @@ export const getWorkerProfile = async () => {
 
 export const getActivePolicy = async () => {
   console.log("📡 [PROD] Fetching Policy...");
-  return apiFetch(`${SERVICES.policy}/api/v1/policies/active/${WORKER_ID}`);
+  const data = await apiFetch<{ policies: any[]; active_count: number }>(
+    `${SERVICES.policy}/api/v1/policies/worker/${WORKER_ID}`
+  );
+  if (!data?.policies?.length) return null;
+  // Pick the first active policy, or fall back to the most recent one
+  const policy =
+    data.policies.find((p: any) => p.status === "active") || data.policies[0];
+  // Normalize field names for the frontend screens
+  return {
+    ...policy,
+    tier: policy.coverage_tier,
+    premium_amount: policy.weekly_premium,
+    max_payout_amount: policy.max_payout_per_event,
+    end_date: policy.coverage_end,
+    start_date: policy.coverage_start,
+  };
 };
 
 export const getWorkerClaims = async () => {
