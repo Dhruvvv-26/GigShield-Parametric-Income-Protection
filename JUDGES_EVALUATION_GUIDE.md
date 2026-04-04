@@ -22,8 +22,8 @@ Ensure your local environment meets the following specifications:
 
 **1. Clone the repository:**
 ```bash
-git clone https://github.com/Dhruvvv-26/GigShield-Parametric-Income-Protection.git
-cd GigShield-Parametric-Income-Protection
+git clone https://github.com/Dhruvvv-26/KavachAI.git
+cd KavachAI
 ```
 
 **2. Setup the Environment Variables:**

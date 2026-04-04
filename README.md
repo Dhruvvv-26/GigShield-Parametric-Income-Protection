@@ -446,7 +446,7 @@ flowchart TD
 | Docker Compose: PostgreSQL + PostGIS + Redis + Redpanda | `docker compose ps` → 4 infrastructure containers healthy | ✅ |
 | PostGIS zone boundaries loaded (Delhi / Mumbai / Bengaluru) | `SELECT zone_id FROM zones WHERE zone_id='delhi_rohini'` returns 1 row | ✅ |
 | Rule-based premium calculator | `POST /api/v1/premium/calculate` returns correct premium with breakdown | ✅ |
-| HTML working prototype | `Prototype/GigShield_working_prototype.html` in any browser — zero install | ✅ |
+| HTML working prototype | `Prototype/KavachAI_Prototype.html` in any browser — zero install | ✅ |
 
 ### Phase 2 — SCALE ✅ COMPLETE (Mar 21 – Apr 4)
 
@@ -517,8 +517,8 @@ docker --version && python3 --version
 ### Step 1 — Clone & Configure
 
 ```bash
-git clone https://github.com/Dhruvvv-26/GigShield-Parametric-Income-Protection.git
-cd GigShield-Parametric-Income-Protection
+git clone https://github.com/Dhruvvv-26/KavachAI.git
+cd KavachAI
 cp .env.example .env
 ```
 
@@ -798,7 +798,7 @@ Viable from 1,000 riders. Real-time loss ratio tracking at `GET /api/v1/payments
 
 ## 13. Working Prototype
 
-**File:** `Prototype/GigShield_working_prototype.html`
+**File:** `Prototype/KavachAI_Prototype.html`
 
 Open in any modern browser — zero server, zero dependencies, zero install.
 
@@ -836,7 +836,7 @@ Demonstrates: rider registration with zone and vehicle selection, live rule-base
 ## 15. File Structure
 
 ```
-GigShield/
+KavachAI/
 │
 ├── worker-app/                         # React Native + Expo rider application
 │   ├── app/
@@ -893,7 +893,7 @@ GigShield/
 ├── monitoring/                         # Prometheus scrape config for all 6 services
 ├── shared/                             # Common DB, Redis, Redpanda utilities across services
 ├── Prototype/
-│   └── GigShield_working_prototype.html
+│   └── KavachAI_Prototype.html
 └── docker-compose.yml                  # Orchestrates all 12 containers with health checks
 ```
 
@@ -916,7 +916,7 @@ GigShield/
 - **YouTube (unlisted demo):** [https://youtu.be/SvxXVfBaTIo](https://youtu.be/SvxXVfBaTIo)
 - **Google Drive — Video:** [Drive Link](https://drive.google.com/file/d/11p0Qzj3ejJncH5XmLfBNeYFsZHFOMOC2/view?usp=sharing)
 - **Google Drive — Submission Folder:** [Drive Link](https://drive.google.com/drive/folders/1SG2l1yzUukmBRNj9vXgMjR7wZiv5MTma?usp=sharing)
-- **GitHub:** [https://github.com/Dhruvvv-26/GigShield-Parametric-Income-Protection.git](https://github.com/Dhruvvv-26/GigShield-Parametric-Income-Protection.git)
+- **GitHub:** [https://github.com/Dhruvvv-26/KavachAI.git](https://github.com/Dhruvvv-26/KavachAI.git)
 
 ---
 
@@ -951,7 +951,7 @@ GigShield/
 
 **Submission artifacts:**
 
-- [x] HTML working prototype — `Prototype/GigShield_working_prototype.html`
+- [x] HTML working prototype — `Prototype/KavachAI_Prototype.html`
 - [x] Before Market Crash architecture — Section 6
 - [x] After Market Crash architecture — Section 7: 12-container, 11-model, 5-layer system with correct APIs (OpenWeatherMap, CPCB India, NDMA, Firebase FCM)
 - [x] YouTube demo video linked
