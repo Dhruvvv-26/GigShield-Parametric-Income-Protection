@@ -524,11 +524,8 @@ cp .env.example .env
 
 The `.env.example` file includes all free-tier API keys and default values. For a local evaluation, the backend's fail-closed fallback mechanisms handle any rate-limit edge cases gracefully. Open `.env` to verify DB passwords and broker URLs match localhost defaults.
 
-> **For the React Native worker app** (physical device), find your machine's LAN IP:
-> - Mac/Linux: `hostname -I | awk '{print $1}'`
-> - Windows: `ipconfig | findstr "IPv4"`
->
-> Then set `EXPO_PUBLIC_API_HOST=<your-LAN-IP>` in `worker-app/.env`.
+> 📱 **Running the React Native Worker App (Physical Device)**
+> If you want to evaluate the full end-to-end mobile experience (Expo, background sensor payloads, Firebase notifications), please follow our dedicated **[Worker App Demo Guide](WORKER_APP_DEMO.md)**. It walks you through matching your LAN IPs and running the `worker-app` natively so that you can follow along with simulated payouts on your own phone.
 
 ### Step 2 — Build and Start the Stack
 
@@ -691,6 +688,8 @@ python3 scripts/demo_script.py
 ```
 
 ### Manual narration sequence (for video recording)
+
+> **Note:** If you want to replicate this exact mobile experience, refer to our full **[Worker App Demo Guide](WORKER_APP_DEMO.md)** for connecting your physical device via Expo.
 
 Open side by side: terminal + Expo Go app on physical device.
 
