@@ -33,7 +33,7 @@
 11. [Parametric Trigger Design](#11-parametric-trigger-design)
 12. [Weekly Premium Model](#12-weekly-premium-model)
 13. [Working Prototype](#13-working-prototype)
-14. [Tech Stack — 100% Free, All Verified](#14-tech-stack--100-free-all-verified)
+14. [Tech Stack](#14-tech-stack--100-free-all-verified)
 15. [File Structure](#15-file-structure)
 16. [Team](#16-team)
 17. [Submission Checklist](#17-submission-checklist)
