@@ -1,5 +1,5 @@
 # ═══════════════════════════════════════════════════════════════════
-# KavachAI God Mode Demo Script
+# KavachAI Demo Script
 # ═══════════════════════════════════════════════════════════════════
 #
 # JUDGE DEMO SEQUENCE (recommended order):
@@ -182,7 +182,8 @@ def cmd_seed(args):
     # 2. Policy Creation
     try:
         r = requests.get(f"{BASE_URLS['policy']}/api/v1/policies/worker/{DEMO_WORKER_ID}")
-        active = any(p["status"] == "active" for p in r.json()) if r.status_code == 200 else False
+        data = r.json() if r.status_code == 200 else []
+        active = any(p.get("status") == "active" for p in data) if isinstance(data, list) else False
         if active:
             print("Active policy already exists.")
         else:
@@ -191,8 +192,15 @@ def cmd_seed(args):
                 # Cleanup old policies to force DEMO_POLICY_ID
                 cur.execute("DELETE FROM policies WHERE worker_id = %s", (DEMO_WORKER_ID,))
                 cur.execute("""
-                    INSERT INTO policies (id, worker_id, zone_id, tier, base_premium, risk_multiplier, total_premium, status)
-                    VALUES (%s, %s, (SELECT id FROM zones WHERE zone_code = %s), 'standard', 80.0, 1.5, 127.0, 'active')
+                    INSERT INTO policies (
+                        id, worker_id, zone_id, coverage_tier, status,
+                        weekly_premium, max_payout_per_event, max_payout_per_week,
+                        coverage_start, coverage_end
+                    )
+                    VALUES (
+                        %s, %s, (SELECT id FROM zones WHERE zone_code = %s LIMIT 1), 'standard', 'active',
+                        127.00, 500.00, 1500.00, NOW(), NOW() + INTERVAL '7 days'
+                    )
                 """, (DEMO_POLICY_ID, DEMO_WORKER_ID, DEMO_ZONE))
     except Exception as e:
          print(f"Failed to verify/create policy: {e}")

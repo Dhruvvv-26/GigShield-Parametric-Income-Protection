@@ -59,6 +59,7 @@ CREATE TABLE workers (
     upi_id                  TEXT,                          -- Fernet encrypted
     work_location           GEOMETRY(POINT, 4326),         -- Last known GPS
     zone_id                 UUID REFERENCES zones(id),
+    primary_zone_id         UUID REFERENCES zones(id),
     is_active               BOOLEAN NOT NULL DEFAULT TRUE,
     created_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at              TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -162,6 +163,7 @@ CREATE TABLE claims (
     fraud_score         NUMERIC(5,4),               -- 0.0000 – 1.0000
     fraud_flags         JSONB DEFAULT '[]',          -- Array of flag codes
     worker_gps_at_claim GEOMETRY(POINT, 4326),
+    sensor_data         JSONB,
     created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     reviewed_at         TIMESTAMPTZ,
     completed_at        TIMESTAMPTZ,

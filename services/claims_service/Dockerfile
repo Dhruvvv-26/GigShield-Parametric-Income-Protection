@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     gcc \
     libgeos-dev \
+    libgomp1 \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
@@ -36,6 +37,7 @@ ENV PATH=/home/kavachai/.local/bin:$PATH
 # Copy application code (context = repo root)
 COPY ./services/claims_service /app/
 COPY ./shared /app/shared/
+COPY ./ml/models /app/models/
 
 # Non-root user for security
 RUN useradd -m -u 1001 kavachai && chown -R kavachai:kavachai /app

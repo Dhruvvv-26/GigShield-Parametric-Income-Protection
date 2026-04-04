@@ -28,85 +28,9 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.get(
-    "/{payment_id}",
-    response_model=PaymentResponse,
-    summary="Get payment by ID",
-)
-async def get_payment(
-    payment_id: UUID,
-    db: AsyncSession = Depends(get_db),
-):
-    """Retrieve a single payment record."""
-    result = await db.execute(
-        select(Payment).where(Payment.id == payment_id)
-    )
-    payment = result.scalar_one_or_none()
-    if not payment:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Payment {payment_id} not found",
-        )
-
-    return PaymentResponse(
-        payment_id=payment.id,
-        claim_id=payment.claim_id,
-        worker_id=payment.worker_id,
-        amount=float(payment.amount),
-        status=payment.status,
-        razorpay_payout_id=payment.razorpay_payout_id,
-        upi_id_masked=payment.upi_id_masked,
-        initiated_at=payment.initiated_at,
-        completed_at=payment.completed_at,
-        failed_at=payment.failed_at,
-        failure_reason=payment.failure_reason,
-    )
-
-
-@router.get(
-    "/worker/{worker_id}",
-    response_model=PaymentListResponse,
-    summary="Get payment history for a worker",
-)
-async def get_worker_payments(
-    worker_id: UUID,
-    limit: int = Query(50, ge=1, le=200),
-    db: AsyncSession = Depends(get_db),
-):
-    """Retrieve all payments for a specific worker."""
-    result = await db.execute(
-        select(Payment)
-        .where(Payment.worker_id == worker_id)
-        .order_by(desc(Payment.initiated_at))
-        .limit(limit)
-    )
-    payments = result.scalars().all()
-
-    count_result = await db.execute(
-        select(func.count(Payment.id)).where(Payment.worker_id == worker_id)
-    )
-    total = count_result.scalar() or 0
-
-    return PaymentListResponse(
-        payments=[
-            PaymentResponse(
-                payment_id=p.id,
-                claim_id=p.claim_id,
-                worker_id=p.worker_id,
-                amount=float(p.amount),
-                status=p.status,
-                razorpay_payout_id=p.razorpay_payout_id,
-                upi_id_masked=p.upi_id_masked,
-                initiated_at=p.initiated_at,
-                completed_at=p.completed_at,
-                failed_at=p.failed_at,
-                failure_reason=p.failure_reason,
-            )
-            for p in payments
-        ],
-        total=total,
-        worker_id=str(worker_id),
-    )
+# ── IMPORTANT: /summary and /worker/{id} MUST be declared before /{payment_id}
+# FastAPI matches routes in declaration order. A catch-all UUID path param
+# would swallow "summary" as a (failing) UUID parse attempt otherwise.
 
 
 @router.get(
@@ -215,6 +139,87 @@ async def get_payment_summary(
         payments_failed=payments_failed,
         avg_payout_amount=round(avg_payout, 2),
         daily_payout_volume=round(daily_volume, 2),
+    )
+
+
+@router.get(
+    "/worker/{worker_id}",
+    response_model=PaymentListResponse,
+    summary="Get payment history for a worker",
+)
+async def get_worker_payments(
+    worker_id: UUID,
+    limit: int = Query(50, ge=1, le=200),
+    db: AsyncSession = Depends(get_db),
+):
+    """Retrieve all payments for a specific worker."""
+    result = await db.execute(
+        select(Payment)
+        .where(Payment.worker_id == worker_id)
+        .order_by(desc(Payment.initiated_at))
+        .limit(limit)
+    )
+    payments = result.scalars().all()
+
+    count_result = await db.execute(
+        select(func.count(Payment.id)).where(Payment.worker_id == worker_id)
+    )
+    total = count_result.scalar() or 0
+
+    return PaymentListResponse(
+        payments=[
+            PaymentResponse(
+                payment_id=p.id,
+                claim_id=p.claim_id,
+                worker_id=p.worker_id,
+                amount=float(p.amount),
+                status=p.status,
+                razorpay_payout_id=p.razorpay_payout_id,
+                upi_id_masked=p.upi_id_masked,
+                initiated_at=p.initiated_at,
+                completed_at=p.completed_at,
+                failed_at=p.failed_at,
+                failure_reason=p.failure_reason,
+            )
+            for p in payments
+        ],
+        total=total,
+        worker_id=str(worker_id),
+    )
+
+
+@router.get(
+    "/{payment_id}",
+    response_model=PaymentResponse,
+    summary="Get payment by ID",
+)
+async def get_payment(
+    payment_id: UUID,
+    db: AsyncSession = Depends(get_db),
+):
+    """Retrieve a single payment record."""
+    result = await db.execute(
+        select(Payment).where(Payment.id == payment_id)
+    )
+    payment = result.scalar_one_or_none()
+    if not payment:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Payment {payment_id} not found",
+        )
+
+    return PaymentResponse(
+        payment_id=payment.id,
+        claim_id=payment.claim_id,
+        worker_id=payment.worker_id,
+        amount=float(payment.amount),
+        status=payment.status,
+        razorpay_payout_id=payment.razorpay_payout_id,
+        upi_id_masked=payment.upi_id_masked,
+        initiated_at=payment.initiated_at,
+        completed_at=payment.completed_at,
+        failed_at=payment.failed_at,
+        failure_reason=payment.failure_reason,
     )
 
 

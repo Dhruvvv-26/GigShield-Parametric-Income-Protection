@@ -171,7 +171,7 @@ def main():
     args = parser.parse_args()
 
     print("=" * 60)
-    print("🎯 KavachAI — 5-Star Demo Script")
+    print("🎯 KavachAI — Demo Script")
     print(f"   Base URL: {BASE_URL}")
     print(f"   Trigger:  {TRIGGER_URL}")
     print("=" * 60)
@@ -203,7 +203,7 @@ def main():
     print(f"\n  ⏱  Total time: {total_elapsed:.1f}s")
 
     if all_passed:
-        print(f"\n🎯 KavachAI 5-Star Demo: All checks passed in {total_elapsed:.1f}s")
+        print(f"\n🎯 KavachAI Demo: All checks passed in {total_elapsed:.1f}s")
         sys.exit(0)
     else:
         print(f"\n❌ Some checks failed. Review output above.")

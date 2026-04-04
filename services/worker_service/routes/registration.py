@@ -129,6 +129,7 @@ async def register_worker(
         upi_id=_encrypt_upi(payload.upi_id) if payload.upi_id else None,
         work_location=work_point,
         zone_id=zone.id,
+        primary_zone_id=zone.id,
         kyc_status="pending",
         is_active=True,
     )

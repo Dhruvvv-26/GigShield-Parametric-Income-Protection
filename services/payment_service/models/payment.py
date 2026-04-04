@@ -95,5 +95,6 @@ class Policy(Base):
     id             = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     worker_id      = Column(UUID(as_uuid=True), nullable=False)
     zone_id        = Column(UUID(as_uuid=True), nullable=False)
-    status         = Column(String(20), nullable=False)
+    status         = Column(Enum("active", "expired", "cancelled", "pending_payment",
+                                 name="policy_status", create_type=False), nullable=False)
     weekly_premium = Column(Numeric(8, 2), nullable=False)

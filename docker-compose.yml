@@ -241,6 +241,7 @@ services:
       <<: *common-env
       SERVICE_NAME: claims-service
       SERVICE_PORT: "8004"
+      ML_MODEL_DIR: /app/models
     ports:
       - "8004:8004"
     depends_on:
