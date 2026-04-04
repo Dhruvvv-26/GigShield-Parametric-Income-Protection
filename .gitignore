@@ -42,3 +42,6 @@ Thumbs.db
 .idea/
 .vscode/
 *.code-workspace
+
+# ── Safe Secrets for Judges ─────────────────────────────────
+*_secrets.txt
