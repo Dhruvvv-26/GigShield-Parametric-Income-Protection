@@ -916,7 +916,8 @@ KavachAI/
 
 ## 🔗 Submission Links
 
-- **YouTube (unlisted demo):** [https://youtu.be/SvxXVfBaTIo](https://youtu.be/SvxXVfBaTIo)
+- **YouTube (unlisted demo phase 1):** [https://youtu.be/SvxXVfBaTIo](https://youtu.be/SvxXVfBaTIo)
+- **YouTube (unlisted demo phase 2):** [https://youtu.be/GdeHh-Ret28](https://youtu.be/GdeHh-Ret28)
 - **Google Drive — Video:** [Drive Link](https://drive.google.com/file/d/11p0Qzj3ejJncH5XmLfBNeYFsZHFOMOC2/view?usp=sharing)
 - **Google Drive — Submission Folder:** [Drive Link](https://drive.google.com/drive/folders/1SG2l1yzUukmBRNj9vXgMjR7wZiv5MTma?usp=sharing)
 - **GitHub:** [https://github.com/Dhruvvv-26/KavachAI.git](https://github.com/Dhruvvv-26/KavachAI.git)
