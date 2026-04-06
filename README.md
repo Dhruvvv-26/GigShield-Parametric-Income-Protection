@@ -479,7 +479,7 @@ flowchart TD
 
 ```
 worker_id:  6fc7ae56-8cc2-4d32-b8cf-c21844a177ce  (Arjun Kumar, Blinkit, Delhi Rohini)
-policy_id:  21bc33f9-fa75-4a27-983b-df1a1b1fe4f1  (Standard, ₹67.60/week, Max ₹600/event)
+policy_id:  21bc33f9-fa75-4a27-983b-df1a1b1fe4f1  (Standard, ₹127.00/week, Max ₹600/event)
 Zone:       delhi_rohini  |  centroid lat=28.7300, lon=77.1150
 ```
 
@@ -700,7 +700,7 @@ Open side by side: terminal + Expo Go app on physical device.
 ```
 T+00s  Terminal: python3 scripts/god_mode_demo.py trigger --scenario clean
 T+02s  App:      Home screen — "Coverage Active", live AQI 450, Temp 38°C
-T+10s  App:      My Policy — ₹67.60/week, all 5 triggers listed
+T+10s  App:      My Policy — ₹127/week, all 5 triggers listed
 T+18s  Terminal: Claim created | fraud_score: 0.12 | AUTO_APPROVED | Rs350
 T+25s  App:      Payouts tab — "₹350 credited · AQI Tier 2 · Delhi Rohini"
 T+28s  Phone:    Firebase FCM notification arrives
@@ -777,8 +777,9 @@ Weekly Premium = Base Rate × Zone Risk × Seasonality × Platform × Coverage T
 
 ```
 Arjun — Blinkit cyclist, Rohini Delhi, Standard tier, April:
-₹25 (base) × 2.6 (Delhi NCR) × 1.1 (Blinkit) × 1.2 (Standard) ≈ ₹67.60/week
-Confirmed match with React Native app display ✅
+₹25 (base) × 2.6 (Delhi NCR) × 1.1 (Blinkit) × 1.2 (Standard) = ₹85.80 formula base
+ML ensemble adjusts for 90d disruption history, zone AQI micro-risk, seasonality → ₹127.00/week
+Confirmed match with React Native app and god_mode_demo.py seed ✅
 
 Priya — Blinkit e-bike, Andheri Mumbai, Basic, December:
 ₹25 × 2.4 × 1.1 × 1.0 = ₹66/week (Basic cap → ₹60/week)
