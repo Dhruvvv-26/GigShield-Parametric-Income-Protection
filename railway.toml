@@ -1,0 +1,33 @@
+# ============================================================
+# KavachAI — Railway.app Deployment Configuration
+# Root-level config for all 6 FastAPI microservices
+# Each service is deployed as a separate Railway "service"
+# within a single Railway project.
+# ============================================================
+
+[build]
+builder = "DOCKERFILE"
+
+[deploy]
+healthcheckPath = "/health"
+healthcheckTimeout = 300
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
+numReplicas = 1
+
+# ── Service-specific overrides ────────────────────────────────
+# Railway reads service configs from .railway/ directory.
+# Each service has its own JSON config pointing to its
+# Dockerfile.railway and setting the correct PORT.
+#
+# Services and their ports:
+#   worker_service   → 8001
+#   policy_service   → 8002
+#   trigger_engine   → 8003
+#   claims_service   → 8004
+#   payment_service  → 8005
+#   ml_service       → 8006
+#
+# Infrastructure (postgres, redis, redpanda) uses Railway
+# managed add-ons or remains on docker-compose for local dev.
+# ============================================================

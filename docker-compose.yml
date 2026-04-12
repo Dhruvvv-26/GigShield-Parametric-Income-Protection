@@ -1,9 +1,7 @@
 version: "3.9"
 
-# ============================================================
 # KavachAI — Full Stack Docker Compose
 # Phase 2 / Week 3: Worker Service + Policy Service + Trigger Engine
-# ============================================================
 
 networks:
   kavachai-net:
@@ -48,9 +46,7 @@ x-service-defaults: &service-defaults
 
 services:
 
-  # ─────────────────────────────────────────────
   # INFRASTRUCTURE LAYER
-  # ─────────────────────────────────────────────
 
   postgres:
     <<: *service-defaults
@@ -351,3 +347,40 @@ services:
       - "3001:3000"
     depends_on:
       - prometheus
+
+  # ─────────────────────────────────────────────
+  # PHASE 3: ADMIN DASHBOARD
+  # ─────────────────────────────────────────────
+
+  admin-dashboard:
+    build:
+      context: ./admin-dashboard
+      dockerfile: Dockerfile
+    container_name: admin-dashboard
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_WORKER_URL=http://worker-service:8001
+      - VITE_POLICY_URL=http://policy-service:8002
+      - VITE_TRIGGER_URL=http://trigger-engine:8003
+      - VITE_CLAIMS_URL=http://claims-service:8004
+      - VITE_PAYMENT_URL=http://payment-service:8005
+      - VITE_ML_URL=http://ml-service:8006
+      - VITE_DEMO_MODE=false
+    depends_on:
+      worker-service:
+        condition: service_healthy
+      claims-service:
+        condition: service_healthy
+      payment-service:
+        condition: service_healthy
+      ml-service:
+        condition: service_healthy
+    networks:
+      - kavachai-net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped

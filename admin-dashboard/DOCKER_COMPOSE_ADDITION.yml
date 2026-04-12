@@ -1,0 +1,64 @@
+# ============================================================
+# PHASE 3 ADDITION — append this service block to docker-compose.yml
+# Places admin-dashboard as container #13 in the stack.
+# Run: docker compose up -d admin-dashboard
+# Access: http://localhost:3000
+# ============================================================
+
+# Add to the `services:` section of docker-compose.yml:
+
+  admin-dashboard:
+    build:
+      context: ./admin-dashboard
+      dockerfile: Dockerfile
+    container_name: admin-dashboard
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_WORKER_URL=http://worker-service:8001
+      - VITE_POLICY_URL=http://policy-service:8002
+      - VITE_TRIGGER_URL=http://trigger-engine:8003
+      - VITE_CLAIMS_URL=http://claims-service:8004
+      - VITE_PAYMENT_URL=http://payment-service:8005
+      - VITE_ML_URL=http://ml-service:8006
+      - VITE_DEMO_MODE=false
+    depends_on:
+      worker-service:
+        condition: service_healthy
+      claims-service:
+        condition: service_healthy
+      payment-service:
+        condition: service_healthy
+      ml-service:
+        condition: service_healthy
+    networks:
+      - kavachai-network
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+# ============================================================
+# PHASE 3 ADDITION — networkx to ml-service requirements.txt
+# ============================================================
+# Add these lines to services/ml_service/requirements.txt:
+#
+#   networkx>=3.3
+#   python-louvain>=0.16
+#
+# Add this to services/ml_service/Dockerfile (after pip install requirements):
+#   RUN pip install networkx>=3.3 python-louvain>=0.16 --break-system-packages
+#
+# ============================================================
+# PHASE 3 ADDITION — clique detector files to copy into repo
+# ============================================================
+# cp admin-dashboard/clique_detector.py services/ml_service/clique_detector.py
+# cp admin-dashboard/clique_router.py   services/ml_service/routers/clique.py
+#
+# Then in services/ml_service/main.py, add:
+#   from .routers.clique import clique_router, schedule_louvain
+#   app.include_router(clique_router, prefix="/api/v1/clique")
+#   # Inside lifespan, after scheduler.start():
+#   schedule_louvain(scheduler, AsyncSessionLocal)

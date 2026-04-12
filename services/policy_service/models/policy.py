@@ -31,6 +31,15 @@ class Policy(Base):
     coverage_start       = Column(DateTime(timezone=True))
     coverage_end         = Column(DateTime(timezone=True))
     razorpay_payment_id  = Column(String(100))
+    # Force majeure exclusions — JSONB array of exclusion codes
+    exclusions           = Column(JSONB, nullable=False, default=[
+        "ACT_OF_WAR", "PANDEMIC_DECLARED", "TERRORISM",
+        "NUCLEAR_EVENT", "GOVERNMENT_MANDATED_LOCKDOWN_BEYOND_72H"
+    ])
+    # Payout mode: lump_sum (default) or drip_feed
+    payout_mode          = Column(String(20), nullable=False, default="lump_sum")
+    drip_interval_hours  = Column(SmallInteger, nullable=False, default=1)
+    drip_installments    = Column(SmallInteger, nullable=False, default=7)
     created_at           = Column(DateTime(timezone=True), nullable=False,
                                   default=lambda: datetime.now(timezone.utc))
     updated_at           = Column(DateTime(timezone=True), nullable=False,

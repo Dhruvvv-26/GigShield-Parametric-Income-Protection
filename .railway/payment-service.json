@@ -1,0 +1,19 @@
+{
+  "serviceName": "kavachai-payment-service",
+  "dockerfilePath": "services/payment_service/Dockerfile.railway",
+  "rootDirectory": ".",
+  "healthcheckPath": "/health",
+  "healthcheckTimeout": 300,
+  "settings": {
+    "port": 8005,
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 3
+  },
+  "envVars": {
+    "PORT": "8005",
+    "SERVICE_NAME": "payment-service",
+    "SERVICE_PORT": "8005",
+    "ENV": "production",
+    "LOG_LEVEL": "INFO"
+  }
+}

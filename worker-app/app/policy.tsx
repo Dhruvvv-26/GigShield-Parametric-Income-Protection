@@ -98,8 +98,19 @@ export default function PolicyScreen() {
             <Text style={styles.coverageValue}>Delhi Rohini</Text>
           </View>
           <View style={styles.coverageItem}>
-            <Text style={styles.coverageLabel}>Auto-Renew</Text>
-            <Text style={[styles.coverageValue, { color: colors.success }]}>ON</Text>
+            <Text style={styles.coverageLabel}>Payout Mode</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 }}>
+              <View style={{
+                backgroundColor: 'rgba(0, 201, 177, 0.15)',
+                paddingHorizontal: 8,
+                paddingVertical: 2,
+                borderRadius: 12,
+              }}>
+                <Text style={{ color: colors.primary, fontSize: 11, fontWeight: '700' }}>
+                  LUMP SUM
+                </Text>
+              </View>
+            </View>
           </View>
         </View>
 
@@ -113,6 +124,44 @@ export default function PolicyScreen() {
                 <Text style={styles.triggerText}>{trigger}</Text>
               </View>
             ))}
+          </View>
+        </View>
+
+        {/* Force Majeure Exclusions */}
+        <View style={[styles.triggersSection, { marginTop: spacing.lg }]}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: spacing.sm }}>
+            <Ionicons name="alert-circle-outline" size={18} color={colors.warning} />
+            <Text style={[styles.sectionTitle, { marginBottom: 0 }]}>Force Majeure Exclusions</Text>
+          </View>
+          <Text style={{ color: colors.textMuted, fontSize: 12, marginBottom: spacing.sm }}>
+            Events excluded from parametric coverage per IRDAI guidelines:
+          </Text>
+          <View style={styles.triggerList}>
+            {[
+              { code: 'ACT_OF_WAR', label: 'Act of War' },
+              { code: 'PANDEMIC_DECLARED', label: 'WHO Pandemic Declaration' },
+              { code: 'TERRORISM', label: 'Terrorist Incident' },
+              { code: 'NUCLEAR_EVENT', label: 'Nuclear / Radiological Event' },
+              { code: 'GOV_LOCKDOWN_72H+', label: 'Extended Lockdown (>72h)' },
+            ].map((excl, idx) => (
+              <View key={idx} style={styles.triggerItem}>
+                <Ionicons name="close-circle" size={16} color={colors.error} />
+                <Text style={styles.triggerText}>{excl.label}</Text>
+              </View>
+            ))}
+          </View>
+          <View style={{
+            backgroundColor: 'rgba(255, 193, 7, 0.08)',
+            borderWidth: 1,
+            borderColor: 'rgba(255, 193, 7, 0.2)',
+            borderRadius: 8,
+            padding: 10,
+            marginTop: spacing.sm,
+          }}>
+            <Text style={{ color: colors.textDim, fontSize: 11, lineHeight: 16 }}>
+              ℹ️ Short-term curfews (≤72h) and weather disruptions remain covered.
+              Exclusions only apply for officially designated events.
+            </Text>
           </View>
         </View>
       </View>

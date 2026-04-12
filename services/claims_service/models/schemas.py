@@ -72,6 +72,14 @@ class ClaimAdminReviewRequest(BaseModel):
 
 # ── Response Schemas ─────────────────────────────────────────────────────────
 
+class LayerScores(BaseModel):
+    """Per-layer fraud score breakdown for transparency."""
+    gps: Optional[float] = None
+    sensor: Optional[float] = None
+    network: Optional[float] = None
+    behavioral: Optional[float] = None
+
+
 class ClaimResponse(BaseModel):
     claim_id: UUID
     policy_id: UUID
@@ -81,6 +89,7 @@ class ClaimResponse(BaseModel):
     payout_amount: float
     fraud_score: Optional[float] = None
     fraud_flags: Optional[list] = None
+    layer_scores: Optional[LayerScores] = None
     created_at: datetime
     reviewed_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
@@ -95,11 +104,15 @@ class ClaimDetailResponse(ClaimResponse):
     zone_code: Optional[str] = None
     city: Optional[str] = None
     metric_value: Optional[float] = None
+    selfie_url: Optional[str] = None
+    reviewer_note: Optional[str] = None
 
 
 class ClaimListResponse(BaseModel):
     claims: list[ClaimResponse]
     total: int
+    page: int = 1
+    per_page: int = 50
     zone_code: Optional[str] = None
 
 

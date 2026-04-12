@@ -1,11 +1,12 @@
 """
 Claims Service — REST API Routes
 Endpoints:
-  GET  /api/v1/claims/{claim_id}              — single claim detail
-  GET  /api/v1/claims/worker/{worker_id}       — claims for a worker
-  GET  /api/v1/claims/zone/{zone_code}         — claims in a zone
-  POST /api/v1/claims/sensor_data/{worker_id}  — receive sensor data from mobile app
-  POST /api/v1/claims/admin/review/{claim_id}  — admin manual override
+  GET  /api/v1/claims                            — paginated claim listing (admin)
+  GET  /api/v1/claims/{claim_id}                  — single claim detail
+  GET  /api/v1/claims/worker/{worker_id}          — claims for a worker
+  GET  /api/v1/claims/zone/{zone_code}            — claims in a zone
+  POST /api/v1/claims/sensor_data/{worker_id}     — receive sensor data from mobile app
+  POST /api/v1/claims/admin/review/{claim_id}     — admin manual override
 """
 import json
 import logging
@@ -22,6 +23,7 @@ from models.schemas import (
     ClaimDetailResponse,
     ClaimListResponse,
     ClaimResponse,
+    LayerScores,
     SensorDataPayload,
 )
 from shared.database import get_db
@@ -31,61 +33,88 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
+def _claim_to_response(c: Claim) -> ClaimResponse:
+    """Helper to convert ORM Claim to response with layer_scores."""
+    return ClaimResponse(
+        claim_id=c.id,
+        policy_id=c.policy_id,
+        worker_id=c.worker_id,
+        trigger_event_id=c.trigger_event_id,
+        status=c.status,
+        payout_amount=float(c.payout_amount),
+        fraud_score=float(c.fraud_score) if c.fraud_score else None,
+        fraud_flags=c.fraud_flags,
+        layer_scores=LayerScores(
+            gps=float(c.gps_score) if c.gps_score else None,
+            sensor=float(c.sensor_score) if c.sensor_score else None,
+            network=float(c.network_score) if c.network_score else None,
+            behavioral=float(c.behavioral_score) if c.behavioral_score else None,
+        ) if any([c.gps_score, c.sensor_score, c.network_score, c.behavioral_score]) else None,
+        created_at=c.created_at,
+        reviewed_at=c.reviewed_at,
+        completed_at=c.completed_at,
+    )
+
+
+# ── STATIC routes MUST be declared before dynamic /{claim_id} ────────────────
+
+
 @router.get(
-    "/{claim_id}",
-    response_model=ClaimDetailResponse,
-    summary="Get claim by ID",
+    "",
+    response_model=ClaimListResponse,
+    summary="List all claims (paginated, for admin dashboard)",
 )
-async def get_claim(
-    claim_id: UUID,
+async def list_claims(
+    page: int = Query(1, ge=1, description="Page number"),
+    per_page: int = Query(50, ge=1, le=200, description="Items per page"),
+    status_filter: str | None = Query(None, alias="status", description="Filter by status"),
+    zone: str | None = Query(None, description="Filter by zone code"),
     db: AsyncSession = Depends(get_db),
 ):
-    """Retrieve a single claim with trigger event context."""
+    """
+    Paginated listing of all claims. Supports status and zone filters.
+    Used by the admin dashboard fraud queue.
+    """
+    query = select(Claim)
+    count_query = select(func.count(Claim.id))
+
+    # Apply filters
+    if status_filter:
+        query = query.where(Claim.status == status_filter)
+        count_query = count_query.where(Claim.status == status_filter)
+
+    if zone:
+        # Join through trigger_event → zone
+        zone_result = await db.execute(select(Zone).where(Zone.zone_code == zone))
+        zone_obj = zone_result.scalar_one_or_none()
+        if zone_obj:
+            te_ids = await db.execute(
+                select(TriggerEvent.id).where(TriggerEvent.zone_id == zone_obj.id)
+            )
+            trigger_event_ids = [row[0] for row in te_ids.all()]
+            if trigger_event_ids:
+                query = query.where(Claim.trigger_event_id.in_(trigger_event_ids))
+                count_query = count_query.where(Claim.trigger_event_id.in_(trigger_event_ids))
+            else:
+                return ClaimListResponse(claims=[], total=0, page=page, per_page=per_page, zone_code=zone)
+
+    # Total count
+    total_result = await db.execute(count_query)
+    total = total_result.scalar() or 0
+
+    # Paginate
+    offset = (page - 1) * per_page
     result = await db.execute(
-        select(Claim).where(Claim.id == claim_id)
+        query.order_by(desc(Claim.created_at)).limit(per_page).offset(offset)
     )
-    claim = result.scalar_one_or_none()
-    if not claim:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Claim {claim_id} not found",
-        )
+    claims = result.scalars().all()
 
-    # Fetch trigger event context
-    te_result = await db.execute(
-        select(TriggerEvent).where(TriggerEvent.id == claim.trigger_event_id)
-    )
-    trigger_event = te_result.scalar_one_or_none()
-
-    # Fetch zone context
-    zone_code = None
-    city = None
-    if trigger_event:
-        z_result = await db.execute(
-            select(Zone).where(Zone.id == trigger_event.zone_id)
-        )
-        zone = z_result.scalar_one_or_none()
-        if zone:
-            zone_code = zone.zone_code
-            city = zone.city
-
-    return ClaimDetailResponse(
-        claim_id=claim.id,
-        policy_id=claim.policy_id,
-        worker_id=claim.worker_id,
-        trigger_event_id=claim.trigger_event_id,
-        status=claim.status,
-        payout_amount=float(claim.payout_amount),
-        fraud_score=float(claim.fraud_score) if claim.fraud_score else None,
-        fraud_flags=claim.fraud_flags,
-        created_at=claim.created_at,
-        reviewed_at=claim.reviewed_at,
-        completed_at=claim.completed_at,
-        event_type=trigger_event.event_type if trigger_event else None,
-        event_tier=trigger_event.tier if trigger_event else None,
-        zone_code=zone_code,
-        city=city,
-        metric_value=float(trigger_event.metric_value) if trigger_event else None,
+    return ClaimListResponse(
+        claims=[_claim_to_response(c) for c in claims],
+        total=total,
+        page=page,
+        per_page=per_page,
+        zone_code=zone,
     )
 
 
@@ -116,22 +145,7 @@ async def get_worker_claims(
     total = count_result.scalar() or 0
 
     return ClaimListResponse(
-        claims=[
-            ClaimResponse(
-                claim_id=c.id,
-                policy_id=c.policy_id,
-                worker_id=c.worker_id,
-                trigger_event_id=c.trigger_event_id,
-                status=c.status,
-                payout_amount=float(c.payout_amount),
-                fraud_score=float(c.fraud_score) if c.fraud_score else None,
-                fraud_flags=c.fraud_flags,
-                created_at=c.created_at,
-                reviewed_at=c.reviewed_at,
-                completed_at=c.completed_at,
-            )
-            for c in claims
-        ],
+        claims=[_claim_to_response(c) for c in claims],
         total=total,
     )
 
@@ -177,22 +191,7 @@ async def get_zone_claims(
     claims = result.scalars().all()
 
     return ClaimListResponse(
-        claims=[
-            ClaimResponse(
-                claim_id=c.id,
-                policy_id=c.policy_id,
-                worker_id=c.worker_id,
-                trigger_event_id=c.trigger_event_id,
-                status=c.status,
-                payout_amount=float(c.payout_amount),
-                fraud_score=float(c.fraud_score) if c.fraud_score else None,
-                fraud_flags=c.fraud_flags,
-                created_at=c.created_at,
-                reviewed_at=c.reviewed_at,
-                completed_at=c.completed_at,
-            )
-            for c in claims
-        ],
+        claims=[_claim_to_response(c) for c in claims],
         total=len(claims),
         zone_code=zone_code,
     )
@@ -322,9 +321,56 @@ async def admin_review_claim(
         claim.status = "auto_approved"
         claim.reviewed_at = now
 
+    # Save reviewer note if provided
+    if request.reviewer_note:
+        claim.reviewer_note = request.reviewer_note
+
     await db.flush()
 
-    return ClaimResponse(
+    return _claim_to_response(claim)
+
+
+# ── Dynamic route LAST ───────────────────────────────────────────────────────
+
+@router.get(
+    "/{claim_id}",
+    response_model=ClaimDetailResponse,
+    summary="Get claim by ID",
+)
+async def get_claim(
+    claim_id: UUID,
+    db: AsyncSession = Depends(get_db),
+):
+    """Retrieve a single claim with trigger event context."""
+    result = await db.execute(
+        select(Claim).where(Claim.id == claim_id)
+    )
+    claim = result.scalar_one_or_none()
+    if not claim:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Claim {claim_id} not found",
+        )
+
+    # Fetch trigger event context
+    te_result = await db.execute(
+        select(TriggerEvent).where(TriggerEvent.id == claim.trigger_event_id)
+    )
+    trigger_event = te_result.scalar_one_or_none()
+
+    # Fetch zone context
+    zone_code = None
+    city = None
+    if trigger_event:
+        z_result = await db.execute(
+            select(Zone).where(Zone.id == trigger_event.zone_id)
+        )
+        zone = z_result.scalar_one_or_none()
+        if zone:
+            zone_code = zone.zone_code
+            city = zone.city
+
+    return ClaimDetailResponse(
         claim_id=claim.id,
         policy_id=claim.policy_id,
         worker_id=claim.worker_id,
@@ -333,7 +379,20 @@ async def admin_review_claim(
         payout_amount=float(claim.payout_amount),
         fraud_score=float(claim.fraud_score) if claim.fraud_score else None,
         fraud_flags=claim.fraud_flags,
+        layer_scores=LayerScores(
+            gps=float(claim.gps_score) if claim.gps_score else None,
+            sensor=float(claim.sensor_score) if claim.sensor_score else None,
+            network=float(claim.network_score) if claim.network_score else None,
+            behavioral=float(claim.behavioral_score) if claim.behavioral_score else None,
+        ) if any([claim.gps_score, claim.sensor_score, claim.network_score, claim.behavioral_score]) else None,
         created_at=claim.created_at,
         reviewed_at=claim.reviewed_at,
         completed_at=claim.completed_at,
+        event_type=trigger_event.event_type if trigger_event else None,
+        event_tier=trigger_event.tier if trigger_event else None,
+        zone_code=zone_code,
+        city=city,
+        metric_value=float(trigger_event.metric_value) if trigger_event else None,
+        selfie_url=claim.selfie_url,
+        reviewer_note=claim.reviewer_note,
     )

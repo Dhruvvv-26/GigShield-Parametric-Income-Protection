@@ -2,6 +2,7 @@
 Policy Service — Pydantic v2 Schemas
 """
 from datetime import datetime
+from typing import List, Optional
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -51,6 +52,29 @@ class PremiumCalculateResponse(BaseModel):
     calculation_id: UUID          # Logged to premium_calculations table
 
 
+# ── Force Majeure Exclusion Reference ─────────────────────────────────────────
+
+DEFAULT_EXCLUSIONS = [
+    "ACT_OF_WAR",
+    "PANDEMIC_DECLARED",
+    "TERRORISM",
+    "NUCLEAR_EVENT",
+    "GOVERNMENT_MANDATED_LOCKDOWN_BEYOND_72H",
+]
+
+
+class ExclusionDetail(BaseModel):
+    """Single exclusion code with human-readable description."""
+    code: str
+    label: str
+    description: str
+
+
+class ExclusionReferenceResponse(BaseModel):
+    """Master list of all valid exclusion codes."""
+    exclusions: List[ExclusionDetail]
+
+
 # ── Policy ────────────────────────────────────────────────────────────────────
 
 class PolicyCreateRequest(BaseModel):
@@ -60,6 +84,8 @@ class PolicyCreateRequest(BaseModel):
     razorpay_payment_id: str | None = Field(
         None, description="Provided after Razorpay payment is confirmed (Week 4)"
     )
+    # Payout mode: lump_sum (default) or drip_feed
+    payout_mode: str = Field("lump_sum", description="lump_sum | drip_feed")
 
 
 class PolicyResponse(BaseModel):
@@ -76,6 +102,12 @@ class PolicyResponse(BaseModel):
     coverage_start: datetime | None
     coverage_end: datetime | None
     created_at: datetime
+    # Force majeure exclusions
+    exclusions: List[str] = Field(default_factory=lambda: DEFAULT_EXCLUSIONS)
+    # Payout mode
+    payout_mode: str = Field("lump_sum")
+    drip_interval_hours: int = Field(1)
+    drip_installments: int = Field(7)
 
     model_config = {"from_attributes": True}
 

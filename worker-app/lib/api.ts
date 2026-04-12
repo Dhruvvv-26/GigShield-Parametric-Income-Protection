@@ -100,3 +100,24 @@ export const sendSensorPing = async (sensorData: Record<string, any>) => {
     { method: "POST", body: JSON.stringify(sensorData) }
   );
 };
+
+// ── Phase 3 additions ──────────────────────────────────────────────────────
+
+export const fetchPolicyExclusions = async () => {
+  console.log("📡 [PROD] Fetching Force Majeure Exclusions...");
+  return apiFetch<{ exclusions: Array<{ code: string; label: string; description: string }> }>(
+    `${SERVICES.policy}/api/v1/policies/exclusions/reference`
+  );
+};
+
+export const fetchPaymentSummaryPublic = async () => {
+  console.log("📡 [PROD] Fetching Payment Summary (BCR)...");
+  return apiFetch<{
+    total_premiums_this_week: number;
+    total_payouts_this_week: number;
+    loss_ratio_percent: number;
+    burning_cost_rate: number;
+    bcr_status: string;
+    reserve_ratio: number;
+  }>(`${SERVICES.payment}/api/v1/payments/summary`);
+};

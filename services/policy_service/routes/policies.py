@@ -1,6 +1,7 @@
 """
 Policy Service — Policy Routes
 POST   /api/v1/policies
+GET    /api/v1/policies/exclusions/reference     — force majeure exclusion codes
 GET    /api/v1/policies/{policy_id}
 GET    /api/v1/policies/worker/{worker_id}
 PATCH  /api/v1/policies/{policy_id}/activate
@@ -17,6 +18,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.policy import Policy
 from models.schemas import (
+    ExclusionDetail,
+    ExclusionReferenceResponse,
     PolicyActivateRequest,
     PolicyCreateRequest,
     PolicyListResponse,
@@ -62,7 +65,52 @@ async def _policy_to_response(policy: Policy, db) -> PolicyResponse:
         coverage_start=policy.coverage_start,
         coverage_end=policy.coverage_end,
         created_at=policy.created_at,
+        exclusions=policy.exclusions or [],
+        payout_mode=policy.payout_mode or "lump_sum",
+        drip_interval_hours=policy.drip_interval_hours or 1,
+        drip_installments=policy.drip_installments or 7,
     )
+
+
+# ── STATIC routes MUST be declared before dynamic /{policy_id} ────────────────
+
+
+@router.get(
+    "/exclusions/reference",
+    response_model=ExclusionReferenceResponse,
+    summary="Get force majeure exclusion reference list",
+    description="Returns the master list of all exclusion codes that apply to KavachAI parametric policies.",
+)
+async def get_exclusion_reference() -> ExclusionReferenceResponse:
+    """Return the canonical list of force majeure exclusion codes with descriptions."""
+    exclusions = [
+        ExclusionDetail(
+            code="ACT_OF_WAR",
+            label="Act of War",
+            description="Armed conflict, invasion, or blockade declared by sovereign nations.",
+        ),
+        ExclusionDetail(
+            code="PANDEMIC_DECLARED",
+            label="WHO Pandemic Declaration",
+            description="Disruptions caused by a WHO-declared pandemic (e.g. PHEIC). Coverage exclusion only applies after official WHO declaration—prior disruptions remain covered.",
+        ),
+        ExclusionDetail(
+            code="TERRORISM",
+            label="Terrorist Incident",
+            description="Events designated as terrorism by the Home Ministry/NIA.",
+        ),
+        ExclusionDetail(
+            code="NUCLEAR_EVENT",
+            label="Nuclear / Radiological Event",
+            description="Damage from nuclear fission, reactor incidents, or radiological contamination.",
+        ),
+        ExclusionDetail(
+            code="GOVERNMENT_MANDATED_LOCKDOWN_BEYOND_72H",
+            label="Extended Government Lockdown (>72h)",
+            description="Government-mandated lockdowns exceeding 72 hours. Short-term curfews (≤72h) remain covered.",
+        ),
+    ]
+    return ExclusionReferenceResponse(exclusions=exclusions)
 
 
 @router.post(
@@ -150,6 +198,7 @@ async def create_policy(
         coverage_start=now if payload.razorpay_payment_id else None,
         coverage_end=(now + timedelta(days=COVERAGE_PERIOD_DAYS))
         if payload.razorpay_payment_id else None,
+        payout_mode=payload.payout_mode,
     )
     db.add(policy)
     await db.flush()

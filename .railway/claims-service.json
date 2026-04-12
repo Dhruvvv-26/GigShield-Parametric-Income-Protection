@@ -1,0 +1,20 @@
+{
+  "serviceName": "kavachai-claims-service",
+  "dockerfilePath": "services/claims_service/Dockerfile.railway",
+  "rootDirectory": ".",
+  "healthcheckPath": "/health",
+  "healthcheckTimeout": 300,
+  "settings": {
+    "port": 8004,
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 3
+  },
+  "envVars": {
+    "PORT": "8004",
+    "SERVICE_NAME": "claims-service",
+    "SERVICE_PORT": "8004",
+    "ML_MODEL_DIR": "/app/models",
+    "ENV": "production",
+    "LOG_LEVEL": "INFO"
+  }
+}

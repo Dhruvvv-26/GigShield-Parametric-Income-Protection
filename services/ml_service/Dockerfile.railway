@@ -1,0 +1,52 @@
+# ============================================================
+# KavachAI — ML Service — Railway Deployment Dockerfile
+# Single-stage build optimized for Railway.app
+# Build context: repo root (.)
+#
+# NOTE: This service loads 11 ML models at startup (~15s).
+#       Health check start-period is set to 60s to allow
+#       for model loading. /health returns models_loaded: 11
+#       when all models are ready.
+# ============================================================
+
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app \
+    PORT=8006 \
+    MODEL_DIR=/app/ml/models
+
+WORKDIR /app
+
+# System dependencies: libgomp1 (LightGBM thread support — CRITICAL)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies (includes PyTorch CPU, XGBoost, LightGBM, scikit-learn)
+COPY ./services/ml_service/requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt \
+    --extra-index-url https://download.pytorch.org/whl/cpu \
+    && pip install --no-cache-dir networkx>=3.3 python-louvain>=0.16 \
+    && rm /tmp/requirements.txt
+
+# Copy application code
+COPY ./services/ml_service /app/
+
+# Copy ALL 11 ML model files (.pkl + .pt)
+COPY ./ml /app/ml/
+
+# Non-root user for security
+RUN useradd -m -u 1001 kavachai && chown -R kavachai:kavachai /app
+USER kavachai
+
+EXPOSE 8006
+
+# Extended start-period for model loading (11 models = ~15-30s)
+HEALTHCHECK --interval=15s --timeout=10s --start-period=60s --retries=10 \
+    CMD curl -sf http://localhost:8006/health || exit 1
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8006", \
+     "--workers", "1", "--log-level", "info", "--proxy-headers"]

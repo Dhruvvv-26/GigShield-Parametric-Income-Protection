@@ -1,0 +1,46 @@
+# ============================================================
+# KavachAI — Claims Service — Railway Deployment Dockerfile
+# Single-stage build optimized for Railway.app
+# Build context: repo root (.)
+# ============================================================
+
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app:/app/shared \
+    PORT=8004 \
+    ML_MODEL_DIR=/app/models
+
+WORKDIR /app
+
+# System dependencies: PostGIS bindings, psycopg2, libgomp1 (LightGBM)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq-dev \
+    gcc \
+    libgeos-dev \
+    libgomp1 \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
+COPY ./services/claims_service/requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt && rm /tmp/requirements.txt
+
+# Copy application code
+COPY ./services/claims_service /app/
+COPY ./shared /app/shared/
+# Claims service needs ML models for fraud scoring
+COPY ./ml/models /app/models/
+
+# Non-root user for security
+RUN useradd -m -u 1001 kavachai && chown -R kavachai:kavachai /app
+USER kavachai
+
+EXPOSE 8004
+
+HEALTHCHECK --interval=15s --timeout=5s --start-period=30s --retries=5 \
+    CMD curl -sf http://localhost:8004/health || exit 1
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8004", \
+     "--workers", "1", "--log-level", "info", "--proxy-headers"]

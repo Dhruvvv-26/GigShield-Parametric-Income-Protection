@@ -499,6 +499,29 @@ Zone:       delhi_rohini  |  centroid lat=28.7300, lon=77.1150
 
 > **No cloud sprawl.** The entire architecture runs locally. No AWS/GCP IAM roles. No billing surprises. 100% free external APIs — OpenWeatherMap, CPCB India (government, no rate limit), NDMA RSS. Everything below executes on your machine.
 
+### 🌐 Option A — Zero Setup (Public URLs)
+
+> **For judges who want to evaluate immediately without installing anything.** All 6 microservices are deployed on Railway.app and the admin dashboard is on Vercel.
+
+See [PUBLIC_URLS.md](./PUBLIC_URLS.md) for the full service URL table.
+
+```bash
+# Quick health check — all 6 services
+curl -s https://kavachai-worker-service-production.up.railway.app/health | python3 -m json.tool
+curl -s https://kavachai-ml-service-production.up.railway.app/health | python3 -m json.tool
+# Expected: {"status":"healthy","models_loaded":11}
+
+# Demo endpoints
+curl -s https://kavachai-worker-service-production.up.railway.app/api/v1/workers/6fc7ae56-8cc2-4d32-b8cf-c21844a177ce | python3 -m json.tool
+curl -s https://kavachai-policy-service-production.up.railway.app/api/v1/policies/exclusions/reference | python3 -m json.tool
+curl -s https://kavachai-payment-service-production.up.railway.app/api/v1/payments/summary | python3 -m json.tool
+```
+
+> **Admin Dashboard**: Visit [https://kavachai-admin.vercel.app](https://kavachai-admin.vercel.app)
+> Navigate to Fraud Queue, SHAP Explainer, Zone Heatmap, and Actuarial Dashboard.
+
+### 🐳 Option B — Full Local Setup (Docker)
+
 ### Prerequisites
 
 ```bash
@@ -953,6 +976,15 @@ KavachAI/
 - [x] Phase 3 items marked 🔄 with specific target criteria — not claimed complete
 - [x] Phase 2 uses same API contracts that Phase 3 will extend — no pipeline changes required to upgrade
 - [x] Admin dashboard scaffolded — components listed in file structure, marked Phase 3
+
+**Phase 3 technical evidence:**
+
+- [x] Admin Dashboard live at http://localhost:3000 — 5 panels: Live Metrics, Fraud Queue, SHAP, Zone Heatmap, Dual Selfie
+- [x] NetworkX Louvain detection: POST /api/v1/clique/run returns ring alert within 30s
+- [x] 13 Docker containers — admin-dashboard added to docker-compose.yml
+- [ ] Railway + Vercel deployment — public HTTPS URLs in submission links
+- [x] Premium inconsistency resolved — ₹127/week canonical across all documents
+- [ ] Demo video Phase 3 — E2E on physical phone, 3 scenarios
 
 **Submission artifacts:**
 

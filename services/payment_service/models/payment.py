@@ -35,6 +35,11 @@ class Payment(Base):
     failed_at           = Column(DateTime(timezone=True))
     failure_reason      = Column(Text)
     retry_count         = Column(SmallInteger, nullable=False, default=0)
+    # Drip-feed payout mode support
+    payout_mode         = Column(String(20), nullable=False, default="lump_sum")
+    installments_disbursed = Column(SmallInteger, nullable=False, default=0)
+    drip_installments   = Column(SmallInteger, nullable=False, default=1)
+    disbursed_at        = Column(DateTime(timezone=True))
 
     audit_logs = relationship("PaymentAuditLog", back_populates="payment")
 

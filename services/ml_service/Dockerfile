@@ -23,6 +23,7 @@ FROM base AS builder
 COPY ./services/ml_service/requirements.txt .
 RUN pip install --no-cache-dir --user -r requirements.txt \
     --extra-index-url https://download.pytorch.org/whl/cpu
+RUN pip install networkx>=3.3 python-louvain>=0.16 --break-system-packages
 
 # ── Production stage ──────────────────────────────────────────────────────────
 FROM base AS production

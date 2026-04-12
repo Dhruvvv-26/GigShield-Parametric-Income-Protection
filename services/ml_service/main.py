@@ -12,6 +12,14 @@ from contextlib import asynccontextmanager
 import joblib
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+
+# Dummy session for Louvain background task
+class DummySession:
+    async def __aenter__(self): return self
+    async def __aexit__(self, *args): pass
+    async def execute(self, query): raise Exception("No DB bounded — falling back")
+def AsyncSessionLocal(): return DummySession()
 
 logger = logging.getLogger("ml_service")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s | %(message)s")
@@ -110,7 +118,13 @@ async def lifespan(app: FastAPI):
     load_models()
     loaded = sum(1 for v in models.values() if v is not None)
     logger.info(f"ML Service started — {loaded}/{len(models)} models loaded")
+    
+    scheduler = AsyncIOScheduler()
+    scheduler.start()
+    schedule_louvain(scheduler, AsyncSessionLocal)
+    
     yield
+    scheduler.shutdown()
     logger.info("ML Service shutting down")
 
 
@@ -133,10 +147,12 @@ app.add_middleware(
 from routes.premium import router as premium_router
 from routes.fraud import router as fraud_router
 from routes.prediction import router as prediction_router
+from routes.clique import clique_router, schedule_louvain
 
 app.include_router(premium_router, prefix="/api/v1/premium", tags=["Premium"])
 app.include_router(fraud_router, prefix="/api/v1/fraud", tags=["Fraud"])
 app.include_router(prediction_router, prefix="/api/v1/predict", tags=["Prediction"])
+app.include_router(clique_router, prefix="/api/v1/clique")
 
 
 @app.get("/health")

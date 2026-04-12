@@ -1,0 +1,53 @@
+# railway.toml — Phase 3 deployment config
+# Place in repo root. Deploy via: railway up
+# Requires Railway CLI: npm install -g @railway/cli
+
+[build]
+builder = "DOCKERFILE"
+watchPatterns = ["services/**", "models/**", "shared/**"]
+
+# ── Service overrides (set in Railway dashboard per service) ──────────────────
+# Each microservice gets its own Railway service pointing to its subdirectory.
+# Set these in Railway → Service Settings → Root Directory:
+#
+#   worker-service:   services/worker_service
+#   policy-service:   services/policy_service
+#   trigger-engine:   services/trigger_engine
+#   claims-service:   services/claims_service
+#   payment-service:  services/payment_service
+#   ml-service:       services/ml_service
+#   admin-dashboard:  admin-dashboard
+
+# ── Environment variable groups ───────────────────────────────────────────────
+# In Railway → Project → Variables, create a shared variable group with:
+#
+#   DATABASE_URL        = postgresql://... (Railway Postgres addon)
+#   REDIS_URL           = redis://... (Railway Redis addon)
+#   REDPANDA_BROKERS    = redpanda:9092 (internal hostname)
+#
+#   OWM_API_KEY         = <OpenWeatherMap API key>
+#   RAZORPAY_KEY_ID     = rzp_test_...
+#   RAZORPAY_KEY_SECRET = ...
+#   FIREBASE_CREDS_JSON = <base64-encoded service account JSON>
+#
+#   NDMA_MOCK_MODE      = true   (until live NDMA is stable)
+#   FCM_DISPATCH_ENABLED = true
+#
+# Per-service variables (override the shared group):
+#   ml-service: MODEL_PATH=/app/models
+
+# ── Healthcheck paths (Railway uses these for deployment verification) ─────────
+# Each service must return HTTP 200 at /health within 60s of deploy.
+# All 6 FastAPI services already have /health endpoints — no changes needed.
+
+# ── Public domains assigned by Railway ────────────────────────────────────────
+# After first deploy, Railway assigns:
+#   worker-service:  https://worker-service-<hash>.up.railway.app
+#   ml-service:      https://ml-service-<hash>.up.railway.app
+#   admin-dashboard: https://admin-<hash>.up.railway.app
+#
+# Set VITE_*_URL env vars on admin-dashboard service to point to these URLs.
+
+# ── Vercel deployment for admin dashboard (alternative to Railway) ─────────────
+# vercel.json is at admin-dashboard/vercel.json (created below)
+# Deploy: cd admin-dashboard && vercel --prod

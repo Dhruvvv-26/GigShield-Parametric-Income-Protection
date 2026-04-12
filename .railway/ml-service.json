@@ -1,0 +1,20 @@
+{
+  "serviceName": "kavachai-ml-service",
+  "dockerfilePath": "services/ml_service/Dockerfile.railway",
+  "rootDirectory": ".",
+  "healthcheckPath": "/health",
+  "healthcheckTimeout": 300,
+  "settings": {
+    "port": 8006,
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 3
+  },
+  "envVars": {
+    "PORT": "8006",
+    "SERVICE_NAME": "ml-service",
+    "SERVICE_PORT": "8006",
+    "MODEL_DIR": "/app/ml/models",
+    "ENV": "production",
+    "LOG_LEVEL": "INFO"
+  }
+}

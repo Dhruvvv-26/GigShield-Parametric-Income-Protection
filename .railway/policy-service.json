@@ -1,0 +1,19 @@
+{
+  "serviceName": "kavachai-policy-service",
+  "dockerfilePath": "services/policy_service/Dockerfile.railway",
+  "rootDirectory": ".",
+  "healthcheckPath": "/health",
+  "healthcheckTimeout": 300,
+  "settings": {
+    "port": 8002,
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 3
+  },
+  "envVars": {
+    "PORT": "8002",
+    "SERVICE_NAME": "policy-service",
+    "SERVICE_PORT": "8002",
+    "ENV": "production",
+    "LOG_LEVEL": "INFO"
+  }
+}

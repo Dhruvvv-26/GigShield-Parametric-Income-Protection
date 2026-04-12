@@ -66,9 +66,56 @@ async def lifespan(app: FastAPI):
     consumer_task = asyncio.create_task(consumer.consume())
     logger.info("Claims payment consumer started ✓")
 
+    # ── Drip-Feed Payout Scheduler ────────────────────────────────────────────
+    # Runs every hour to disburse next installment for drip_feed payments
+    from apscheduler.schedulers.asyncio import AsyncIOScheduler
+    from apscheduler.triggers.interval import IntervalTrigger
+    scheduler = AsyncIOScheduler()
+
+    async def drip_disburse_job():
+        """Disburse next drip installment for all pending drip-feed payments."""
+        from datetime import datetime, timezone
+        from sqlalchemy import select, and_
+        from shared.database import async_session_factory
+        try:
+            async with async_session_factory() as session:
+                from models.payment import Payment
+                # Find drip-feed payments that still have installments remaining
+                result = await session.execute(
+                    select(Payment).where(
+                        and_(
+                            Payment.payout_mode == "drip_feed",
+                            Payment.status.in_(["pending", "processing"]),
+                            Payment.installments_disbursed < Payment.drip_installments,
+                        )
+                    )
+                )
+                payments = result.scalars().all()
+                for payment in payments:
+                    payment.installments_disbursed += 1
+                    payment.disbursed_at = datetime.now(timezone.utc)
+                    # Mark as completed if all installments done
+                    if payment.installments_disbursed >= payment.drip_installments:
+                        payment.status = "completed"
+                        payment.completed_at = datetime.now(timezone.utc)
+                    logger.info(
+                        f"Drip installment disbursed: payment={payment.id} "
+                        f"installment={payment.installments_disbursed}/{payment.drip_installments}"
+                    )
+                await session.commit()
+                if payments:
+                    logger.info(f"Drip disburse job: processed {len(payments)} payments")
+        except Exception as e:
+            logger.error(f"Drip disburse job error: {e}")
+
+    scheduler.add_job(drip_disburse_job, IntervalTrigger(hours=1), id="drip_disburse", replace_existing=True)
+    scheduler.start()
+    logger.info("Drip-feed payout scheduler started ✓ (hourly)")
+
     yield
 
     logger.info("Payment Service shutting down...")
+    scheduler.shutdown(wait=False)
     if consumer:
         await consumer.stop()
     if consumer_task:

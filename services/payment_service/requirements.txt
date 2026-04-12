@@ -39,3 +39,10 @@ pytest-asyncio==0.23.3
 pytest-cov==4.1.0
 factory-boy==3.3.0
 numpy==1.26.4
+
+# ── WhatsApp Notifications (Twilio) ──────────────────────────────────────────
+twilio==9.0.0
+
+# ── Scheduler (Drip-Feed Payouts) ────────────────────────────────────────────
+apscheduler==3.10.4
+

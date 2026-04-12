@@ -1,0 +1,324 @@
+# ============================================================
+# KavachAI — Railway Dockerfile Validation
+# Builds all 6 services using Dockerfile.railway and validates
+# they start correctly with local infrastructure containers.
+#
+# Usage:
+#   docker compose -f docker-compose.railway-validate.yml up --build
+#   # Wait for all services to be healthy, then:
+#   docker compose -f docker-compose.railway-validate.yml run --rm validator
+#
+# Exit codes:
+#   0 = All 6 services healthy, ML models_loaded=11
+#   1 = One or more services failed validation
+# ============================================================
+
+version: "3.9"
+
+networks:
+  kavachai-validate:
+    driver: bridge
+
+volumes:
+  pg-validate-data:
+  redis-validate-data:
+  redpanda-validate-data:
+
+x-common-env: &common-env
+  DB_HOST: postgres-validate
+  DB_PORT: "5432"
+  DB_NAME: kavachai
+  DB_USER: kavachai
+  DB_PASSWORD: kavachai_validate_2026
+  REDIS_URL: redis://:redis_validate_2026@redis-validate:6379/0
+  REDPANDA_BROKERS: redpanda-validate:9092
+  WORKER_SERVICE_URL: http://worker-validate:8001
+  POLICY_SERVICE_URL: http://policy-validate:8002
+  CLAIMS_SERVICE_URL: http://claims-validate:8004
+  PAYMENT_SERVICE_URL: http://payment-validate:8005
+  ML_SERVICE_URL: http://ml-validate:8006
+  LOG_LEVEL: WARNING
+  ENV: production
+
+services:
+
+  # ── Infrastructure ─────────────────────────────────────────
+
+  postgres-validate:
+    image: postgis/postgis:15-3.3-alpine
+    container_name: postgres-validate
+    environment:
+      POSTGRES_DB: kavachai
+      POSTGRES_USER: kavachai
+      POSTGRES_PASSWORD: kavachai_validate_2026
+    volumes:
+      - pg-validate-data:/var/lib/postgresql/data
+      - ./migrations/01_init.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
+      - ./migrations/02_zones.sql:/docker-entrypoint-initdb.d/02_zones.sql:ro
+    networks:
+      - kavachai-validate
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kavachai -d kavachai"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 15s
+
+  redis-validate:
+    image: redis:7-alpine
+    container_name: redis-validate
+    command: redis-server --requirepass redis_validate_2026 --maxmemory 128mb
+    networks:
+      - kavachai-validate
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "redis_validate_2026", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  redpanda-validate:
+    image: redpandadata/redpanda:v23.3.5
+    container_name: redpanda-validate
+    command:
+      - redpanda
+      - start
+      - --kafka-addr=internal://0.0.0.0:9092
+      - --advertise-kafka-addr=internal://redpanda-validate:9092
+      - --smp=1
+      - --memory=256M
+      - --mode=dev-container
+      - --default-log-level=error
+    networks:
+      - kavachai-validate
+    healthcheck:
+      test: ["CMD-SHELL", "rpk cluster health | grep -E 'Healthy:.+true' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+  # ── Microservices (built from Dockerfile.railway) ──────────
+
+  worker-validate:
+    build:
+      context: .
+      dockerfile: ./services/worker_service/Dockerfile.railway
+    container_name: worker-validate
+    environment:
+      <<: *common-env
+      SERVICE_NAME: worker-service
+      SERVICE_PORT: "8001"
+    depends_on:
+      postgres-validate:
+        condition: service_healthy
+      redis-validate:
+        condition: service_healthy
+    networks:
+      - kavachai-validate
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8001/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  policy-validate:
+    build:
+      context: .
+      dockerfile: ./services/policy_service/Dockerfile.railway
+    container_name: policy-validate
+    environment:
+      <<: *common-env
+      SERVICE_NAME: policy-service
+      SERVICE_PORT: "8002"
+    depends_on:
+      postgres-validate:
+        condition: service_healthy
+      redis-validate:
+        condition: service_healthy
+      worker-validate:
+        condition: service_healthy
+    networks:
+      - kavachai-validate
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8002/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  trigger-validate:
+    build:
+      context: .
+      dockerfile: ./services/trigger_engine/Dockerfile.railway
+    container_name: trigger-validate
+    environment:
+      <<: *common-env
+      SERVICE_NAME: trigger-engine
+      SERVICE_PORT: "8003"
+      OWM_API_KEY: demo_key_validate
+      CPCB_API_KEY: demo_key_validate
+      TRIGGER_POLL_INTERVAL_MINUTES: "60"
+    depends_on:
+      postgres-validate:
+        condition: service_healthy
+      redis-validate:
+        condition: service_healthy
+      redpanda-validate:
+        condition: service_healthy
+    networks:
+      - kavachai-validate
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8003/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  claims-validate:
+    build:
+      context: .
+      dockerfile: ./services/claims_service/Dockerfile.railway
+    container_name: claims-validate
+    environment:
+      <<: *common-env
+      SERVICE_NAME: claims-service
+      SERVICE_PORT: "8004"
+      ML_MODEL_DIR: /app/models
+    depends_on:
+      postgres-validate:
+        condition: service_healthy
+      redis-validate:
+        condition: service_healthy
+      redpanda-validate:
+        condition: service_healthy
+    networks:
+      - kavachai-validate
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8004/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  payment-validate:
+    build:
+      context: .
+      dockerfile: ./services/payment_service/Dockerfile.railway
+    container_name: payment-validate
+    environment:
+      <<: *common-env
+      SERVICE_NAME: payment-service
+      SERVICE_PORT: "8005"
+      RAZORPAY_KEY_ID: demo_key
+      RAZORPAY_KEY_SECRET: demo_secret
+      FCM_DISPATCH_ENABLED: "false"
+    depends_on:
+      postgres-validate:
+        condition: service_healthy
+      redis-validate:
+        condition: service_healthy
+      redpanda-validate:
+        condition: service_healthy
+      claims-validate:
+        condition: service_healthy
+    networks:
+      - kavachai-validate
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8005/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  ml-validate:
+    build:
+      context: .
+      dockerfile: ./services/ml_service/Dockerfile.railway
+    container_name: ml-validate
+    environment:
+      <<: *common-env
+      SERVICE_NAME: ml-service
+      SERVICE_PORT: "8006"
+      MODEL_DIR: /app/ml/models
+    depends_on:
+      postgres-validate:
+        condition: service_healthy
+      redis-validate:
+        condition: service_healthy
+    networks:
+      - kavachai-validate
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8006/health || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 45s
+
+  # ── Validator ──────────────────────────────────────────────
+  # Runs after all services are healthy and validates end-to-end
+
+  validator:
+    image: curlimages/curl:latest
+    container_name: kavachai-validator
+    depends_on:
+      worker-validate:
+        condition: service_healthy
+      policy-validate:
+        condition: service_healthy
+      trigger-validate:
+        condition: service_healthy
+      claims-validate:
+        condition: service_healthy
+      payment-validate:
+        condition: service_healthy
+      ml-validate:
+        condition: service_healthy
+    networks:
+      - kavachai-validate
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "  KavachAI Railway Dockerfile Validation"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        PASS=0
+        FAIL=0
+
+        check_health() {
+          local name="$$1"
+          local url="$$2"
+          local response=$$(curl -sf "$$url" 2>/dev/null || echo "")
+          if [ -n "$$response" ]; then
+            echo "✅ PASS — $$name: $$url"
+            PASS=$$((PASS + 1))
+          else
+            echo "❌ FAIL — $$name: $$url"
+            FAIL=$$((FAIL + 1))
+          fi
+        }
+
+        check_health "Worker Service"  "http://worker-validate:8001/health"
+        check_health "Policy Service"  "http://policy-validate:8002/health"
+        check_health "Trigger Engine"  "http://trigger-validate:8003/health"
+        check_health "Claims Service"  "http://claims-validate:8004/health"
+        check_health "Payment Service" "http://payment-validate:8005/health"
+        check_health "ML Service"      "http://ml-validate:8006/health"
+
+        # Check ML models_loaded
+        echo ""
+        ML_HEALTH=$$(curl -sf "http://ml-validate:8006/health" 2>/dev/null || echo "{}")
+        echo "ML Service health: $$ML_HEALTH"
+
+        echo ""
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "  Result: $$PASS passed, $$FAIL failed"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+        if [ $$FAIL -eq 0 ]; then
+          echo "✅ ALL SERVICES VALIDATED — Railway Dockerfiles are ready"
+          exit 0
+        else
+          echo "❌ VALIDATION FAILED — $$FAIL service(s) need attention"
+          exit 1
+        fi

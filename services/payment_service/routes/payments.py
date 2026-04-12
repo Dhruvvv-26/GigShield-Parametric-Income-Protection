@@ -128,6 +128,58 @@ async def get_payment_summary(
     )
     daily_volume = float(daily_result.scalar() or 0)
 
+    # ── Trailing 30-day window for BCR (Burning Cost Rate) ────────────────────
+    # BCR = (total_payouts / total_exposure_premium) × 100
+    # This is the standard actuarial metric for parametric insurance solvency.
+    thirty_days_ago = now - timedelta(days=30)
+
+    # Trailing 30-day premiums: sum of weekly premiums for policies active anytime in last 30 days
+    t30_premium_result = await db.execute(
+        select(func.sum(Policy.weekly_premium)).where(
+            and_(
+                Policy.status.in_(["active", "expired"]),
+                Policy.coverage_start <= now,
+                Policy.coverage_end >= thirty_days_ago,
+            )
+        )
+    )
+    # Multiply by ~4.3 weeks in 30 days for exposure calculation
+    raw_30d_premiums = float(t30_premium_result.scalar() or 0)
+    trailing_30d_premiums = round(raw_30d_premiums * 4.3, 2)
+
+    # Trailing 30-day payouts
+    t30_payout_result = await db.execute(
+        select(func.sum(Payment.amount)).where(
+            and_(
+                Payment.status.in_(["completed", "processing"]),
+                Payment.initiated_at >= thirty_days_ago,
+            )
+        )
+    )
+    trailing_30d_payouts = float(t30_payout_result.scalar() or 0)
+
+    # BCR calculation
+    burning_cost_rate = (
+        (trailing_30d_payouts / trailing_30d_premiums * 100)
+        if trailing_30d_premiums > 0
+        else 0.0
+    )
+
+    # BCR status thresholds
+    if burning_cost_rate < 70:
+        bcr_status = "SOLVENT"
+    elif burning_cost_rate <= 85:
+        bcr_status = "WATCH"
+    else:
+        bcr_status = "CRITICAL"
+
+    # Reserve ratio: percentage of premiums not yet paid out
+    reserve_ratio = (
+        ((total_premiums - total_payouts) / total_premiums * 100)
+        if total_premiums > 0
+        else 100.0
+    )
+
     return PaymentSummaryResponse(
         total_premiums_this_week=round(total_premiums, 2),
         total_payouts_this_week=round(total_payouts, 2),
@@ -139,6 +191,11 @@ async def get_payment_summary(
         payments_failed=payments_failed,
         avg_payout_amount=round(avg_payout, 2),
         daily_payout_volume=round(daily_volume, 2),
+        burning_cost_rate=round(burning_cost_rate, 2),
+        bcr_status=bcr_status,
+        trailing_30d_premiums=round(trailing_30d_premiums, 2),
+        trailing_30d_payouts=round(trailing_30d_payouts, 2),
+        reserve_ratio=round(reserve_ratio, 2),
     )
 
 

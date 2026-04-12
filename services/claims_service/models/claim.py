@@ -121,6 +121,15 @@ class Claim(Base):
     payout_amount       = Column(Numeric(8, 2), nullable=False)
     fraud_score         = Column(Numeric(5, 4))
     fraud_flags         = Column(JSONB, default=[])
+    # Per-layer fraud score breakdown (Phase 3)
+    gps_score           = Column(Numeric(5, 4))
+    sensor_score        = Column(Numeric(5, 4))
+    network_score       = Column(Numeric(5, 4))
+    behavioral_score    = Column(Numeric(5, 4))
+    # Dual-selfie check
+    selfie_url          = Column(Text)
+    # Admin audit trail
+    reviewer_note       = Column(Text)
     worker_gps_at_claim = Column(Geometry("POINT", srid=4326))
     sensor_data         = Column(JSONB)
     created_at          = Column(DateTime(timezone=True), nullable=False,

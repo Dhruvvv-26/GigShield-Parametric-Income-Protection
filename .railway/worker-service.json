@@ -1,0 +1,19 @@
+{
+  "serviceName": "kavachai-worker-service",
+  "dockerfilePath": "services/worker_service/Dockerfile.railway",
+  "rootDirectory": ".",
+  "healthcheckPath": "/health",
+  "healthcheckTimeout": 300,
+  "settings": {
+    "port": 8001,
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 3
+  },
+  "envVars": {
+    "PORT": "8001",
+    "SERVICE_NAME": "worker-service",
+    "SERVICE_PORT": "8001",
+    "ENV": "production",
+    "LOG_LEVEL": "INFO"
+  }
+}

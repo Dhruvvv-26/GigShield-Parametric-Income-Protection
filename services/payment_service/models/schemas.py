@@ -42,6 +42,12 @@ class PaymentSummaryResponse(BaseModel):
     payments_failed: int
     avg_payout_amount: float
     daily_payout_volume: float
+    # BCR = Burning Cost Rate — standard actuarial metric for parametric insurance solvency
+    burning_cost_rate: float = Field(0.0, description="(total_payouts / total_exposure_premium) × 100 over trailing 30 days")
+    bcr_status: str = Field("SOLVENT", description="SOLVENT (<70) | WATCH (70-85) | CRITICAL (>85)")
+    trailing_30d_premiums: float = Field(0.0, description="Sum of premiums collected in last 30 calendar days")
+    trailing_30d_payouts: float = Field(0.0, description="Sum of payouts initiated in last 30 calendar days")
+    reserve_ratio: float = Field(0.0, description="(total_premiums - total_payouts) / total_premiums × 100")
 
 
 class RazorpayWebhookPayload(BaseModel):
